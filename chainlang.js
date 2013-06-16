@@ -12,65 +12,45 @@ chainlang.create = function(lang){
         throw "chainlang.create expects one argument: An object containing the methods of the new chain language";
     }
     
-    // Assigned to "this" on every Chain constructor call. Allows us to
-    // apply methods of sub-properties onto the chain to allow consistent
-    // access to _prev, _data, etc.
-    var theChain = {};
-
-    function Chain(obj){
-        if(!(this instanceof Chain)){
-            return new Chain(obj);
-        }
-        
-        theChain = this;
-
-        // TODO: Simply assign all properties of lang to the prototype,
-        //       Then, we can use closure to call a proxied version of the functions
-        //       binding the context to "theChain"
-        for(var prop in Chain.prototype){
-            if(typeof Chain.prototype[prop] == 'function'){
-                continue;
-            }
-
-            this[prop] = {};
-            for(var subProp in Chain.prototype[prop]){
-                if(typeof Chain.prototype[prop][subProp] != 'function'){
-                    continue;
-                }
-
-                theChain[prop][subProp] = createProxiedMethod(Chain.prototype[prop][subProp], theChain);
-            }
-        }
-
-        theChain._obj = obj;
+    var theChain = createChainableProxy(lang);
+    
+    function chain(obj){
+        // Each call to chain resets the context
+        theChain._subject = obj;
         theChain._data = {};
         theChain._prev = null;
+        return theChain;
     }
-    
-    for(var prop in lang){
-        if(typeof lang[prop] == 'function'){
-            Chain.prototype[prop] = createProxiedMethod(lang[prop]);
+
+    return chain;
+}
+
+function createChainableProxy(language){
+    var chain = {};
+    createChainableProxyNode(
+        chain, /* Initial node is the chain itself*/
+        chain, 
+        language);
+    return chain;
+}
+
+function createChainableProxyNode(node, chain, language){
+    for(var propName in language){
+        var prop = language[propName];
+
+        if(typeof prop == 'function'){
+            node[propName] = createChainableProxiedMethod(chain, prop);
         }
         else{
-            Chain.prototype[prop] = lang[prop];
+            node[propName] = {};
+            createChainableProxyNode(node[propName], chain, prop);
         }
     }
-    return Chain;
 }
 
-function callProxiedMethod(){
-}
-
-
-function createProxiedMethod(fn, self){
-    if(!self){
-        return function(){
-            this._prev = fn.apply(this, arguments);
-            return this;
-        }
-    }
+function createChainableProxiedMethod(chain, fn){
     return function(){
-        self._prev = fn.apply(self, arguments);
-        return self;
+        chain._prev = fn.apply(chain, arguments);
+        return chain;
     }
 }
