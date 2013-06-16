@@ -3,8 +3,6 @@
  * File: chainlang.js
  */
 
-var _ = require('underscore');
-
 var chainlang = module.exports;
 
 chainlang.create = function(lang){
@@ -13,8 +11,12 @@ chainlang.create = function(lang){
     }
     
     var theChain = createChainableProxy(lang);
-    
+
     function chain(obj){
+        if(arguments.length > 1){
+            throw "Chain constructors can only accept one argument";
+        }
+
         // Each call to chain resets the context
         theChain._subject = obj;
         theChain._data = {};
@@ -28,7 +30,7 @@ chainlang.create = function(lang){
 function createChainableProxy(language){
     var chain = {};
     createChainableProxyNode(
-        chain, /* Initial node is the chain itself*/
+        chain, /* Initial node is the chain itself */
         chain, 
         language);
     return chain;
@@ -41,9 +43,12 @@ function createChainableProxyNode(node, chain, language){
         if(typeof prop == 'function'){
             node[propName] = createChainableProxiedMethod(chain, prop);
         }
-        else{
+        else if(typeof prop == 'object'){
             node[propName] = {};
             createChainableProxyNode(node[propName], chain, prop);
+        }
+        else{
+            node[propName] = prop;
         }
     }
 }
