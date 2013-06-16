@@ -1,0 +1,16 @@
+
+
+  chainlang.create(lang)
+    ◦ requires exactly one argument: [2K[0G    ✓ requires exactly one argument 
+    ◦ returns a chain constructor for the new language: [2K[0G    ✓ returns a chain constructor for the new language 
+
+  A chain constructor returned from chainlang.create
+    ◦ constructs a chain object with a method by the same name for each method on the object passed to create: [2K[0G    ✓ constructs a chain object with a method by the same name for each method on the object passed to create 
+
+  A chain object
+    ◦ contains a _prev property that contains the return value of the last function in the chain: [2K[0G    ✓ contains a _prev property that contains the return value of the last function in the chain 
+    ◦ contains a _data property which can be used to pass data through the chain and is initally an empty object: [2K[0G    ✓ contains a _data property which can be used to pass data through the chain and is initally an empty object 
+
+
+  5 passing (15 ms)
+
