@@ -52,7 +52,7 @@ describe('A chain constructor returned from chainlang.create', function(){
 });
 
 describe('A chain object', function(){
-    it('contains a _prev property that always contains the return value of the last function in the chain', function(){
+    it('contains a "_prev" property that always contains the return value of the last function in the chain', function(){
         var chain = chainlang.create(
             {
                 returnsOne: function(){return 1;},
@@ -64,7 +64,7 @@ describe('A chain object', function(){
         expect(link.returnsTwo()._prev).to.be(2);
     });
 
-    it('contains a _data property (which can be used to pass data through the chain)', function(){
+    it('contains a "_data" property (which can be used to pass data through the chain)', function(){
         var link = chainlang.create({})();
         expect(link).to.have.key('_data');
 
@@ -77,7 +77,7 @@ describe('A chain object', function(){
         expect(hasOwnKey).to.be(false);
     });
 
-    it('contains a _subject property, which references the optional parameter to the chain constructor if supplied', function(){
+    it('contains a "_subject" property, which references the optional parameter to the chain constructor if supplied', function(){
         var chain = chainlang.create({});
         var actualSubject = {iAm: "theSubject"};
 
@@ -136,6 +136,21 @@ describe('A chain object', function(){
         expect(spy.thisValues[0]).to.be.eql(link);
         expect(spy.thisValues[1]).to.be.eql(link);
     });
+
+    it('contains a "_return" propery that breaks the chain and returns its value when set', function(){
+        var chain = chainlang.create({
+            someFn: function(){
+                return "I came from someFn";
+            },
+            iBreakTheChain: function(){
+                this._return = this._prev;
+            }
+        });
+
+        var result = chain().someFn().iBreakTheChain();
+
+        expect(result).to.be("I came from someFn")
+    });
 });
 
 describe('The _data property of a chain', function(){
@@ -160,6 +175,41 @@ describe('The _data property of a chain', function(){
         expect(
             chain().setsData().doesNothing().readsAndReturnsData()._prev
         ).to.be(1);
+    });
+});
+
+describe('Any node in the chain object graph', function(){
+    it('may include an "_invoke" method, that is executed in the chain if the property is called as a function', function(){
+        var spy = sinon.spy();
+        var chain = chainlang.create({
+            prop: {
+                _invoke: spy,
+                methodsStillAvailable: function(){
+                    this._return = true;
+                }
+            }
+        });
+
+        chain().prop();
+
+        expect(spy.called).to.be(true);
+        expect(chain().prop.methodsStillAvailable()).to.be(true);
+    });
+
+    it('may include a "_filter" method, that will run after all calls to methods decendant from the node', function(){
+        var chain = chainlang.create({
+            not: {
+                _filter: function(){
+                    this._return = !(this._return);
+                },
+
+                returnTrue: function(){
+                    this._return = true;
+                }
+            }
+        });
+
+        expect(chain().not.returnTrue()).to.be(false);
     });
 });
 
