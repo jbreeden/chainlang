@@ -30,18 +30,19 @@ chainlang.create = function(lang){
 }
 
 function createChainableProxy(language){
-    var chain = {};
+    var wrappers = [],
+        chain = {};
 
     createChainableProxyNode(
         chain, /* Initial node is the chain itself */
         chain, 
         language,
-        [],
-        []);
-    return chain;
-}
+        wrappers);
 
-function createChainableProxyNode(node, chain, language, filters, wrappers){
+    return chain;
+};
+
+function createChainableProxyNode(node, chain, language, wrappers){
     // TODO: The stench is strong with this one
 
     for(var propName in language){
@@ -52,43 +53,33 @@ function createChainableProxyNode(node, chain, language, filters, wrappers){
         var prop = language[propName];
 
         if(typeof prop === 'function'){
-            node[propName] = createChainableProxiedMethod(chain, prop, filters, wrappers);
+            node[propName] = createChainableProxiedMethod(chain, prop, wrappers);
         }
         else if(typeof prop === 'object'){
             if(prop['_invoke'] !== undefined 
                && (typeof prop['_invoke'] == 'function'))
             {
-                node[propName] = createChainableProxiedMethod(chain, prop['_invoke'], filters, wrappers);        
+                node[propName] = createChainableProxiedMethod(chain, prop['_invoke'], wrappers);        
             }
             else
             {
                 node[propName] = {};
             }
 
-            var hasFilter = 
-                (prop['_filter'] !== undefined)
-                && (typeof prop['_filter'] == 'function');
-
             var hasWrapper = 
                 (prop['_wrapper'] !== undefined)
                 && (typeof prop['_wrapper'] == 'function');
 
-            if(hasFilter)
-            {
-                filters.push(prop['_filter']);
-            }
             if(hasWrapper){
                 wrappers.push(prop['_wrapper']);
             }
             
-            createChainableProxyNode(node[propName], chain, prop, filters, wrappers);
+            createChainableProxyNode(node[propName], chain, prop, wrappers);
             
-            if(hasFilter){
-                filters.pop();
-            }
             if(hasWrapper){
                 wrappers.pop();
             }
+
         }
         else{
             node[propName] = prop;
@@ -96,17 +87,12 @@ function createChainableProxyNode(node, chain, language, filters, wrappers){
     }
 }
 
-function createChainableProxiedMethod(chain, fn, filters, wrappers){
+function createChainableProxiedMethod(chain, fn, wrappers){
     var i,
-        filters = captureArray(filters),
         wrappers = captureArray(wrappers);
 
     var proxiedMethod = function(){
         chain._prev = fn.apply(chain, arguments);
-
-        for(var i = filters.length - 1; i >= 0; i -= 1){
-            filters[i].apply(chain);
-        }
 
         if(chain._return !== undefined){
             return chain._return;
@@ -115,28 +101,28 @@ function createChainableProxiedMethod(chain, fn, filters, wrappers){
         return chain;
     }
 
-    // TODO: Yikes.
     if(wrappers.length > 0){
         for(i = wrappers.length - 1; i >= 0; i -= 1){
-            proxiedMethod = 
-                (function(innerFunction, wrapperFunction){
-                    return function(){
-                        args = arguments;
-                        chain._prev = wrapperFunction.call(chain, function(){
-                            return innerFunction.apply(chain, args);
-                        });
-
-                        if(chain._return !== undefined){
-                            return chain._return;
-                        }
-
-                        return chain;
-                    }
-                }(proxiedMethod, wrappers[i]));
+            proxiedMethod = createWrappedChainableMethod(chain, wrappers[i], proxiedMethod);
         }
     }
 
     return proxiedMethod;
+}
+
+function createWrappedChainableMethod(chain, wrapperFunction, innerFunction){
+    return function(){
+        args = arguments;
+        chain._prev = wrapperFunction.call(chain, function(){
+            return innerFunction.apply(chain, args);
+        });
+
+        if(chain._return !== undefined){
+            return chain._return;
+        }
+
+        return chain;
+    }
 }
 
 // "Captures" an array. (i.e. makes a new array with the same references

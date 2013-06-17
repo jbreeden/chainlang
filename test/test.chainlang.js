@@ -196,20 +196,24 @@ describe('Any node in the chain object graph', function(){
         expect(chain().prop.methodsStillAvailable()).to.be(true);
     });
 
-    it('may include a "_filter" method, that will run after all calls to methods decendant from the node', function(){
-        var chain = chainlang.create({
-            not: {
-                _filter: function(){
-                    this._return = !(this._return);
-                },
-
-                returnTrue: function(){
-                    this._return = true;
-                }
+    it('may include a "_wrapper" method, that accepts a callback used to apply a called decendant method onto the chain', function(){
+        var lang = {
+            returnsTrue: function(){
+                this._return = true;
             }
-        });
+        };
+        lang.negator = {
+            _wrapper: function(calledMethod){
+                calledMethod();
+                this._return = !(this._return);
+            },
+            returnsTrue: lang.returnsTrue
+        };
 
-        expect(chain().not.returnTrue()).to.be(false);
+        var chain = chainlang.create(lang);
+
+        expect(chain().returnsTrue()).to.be(true);
+        expect(chain().negator.returnsTrue()).to.be(false);
     });
 });
 
