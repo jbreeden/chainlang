@@ -30,7 +30,7 @@ describe('A chain constructor returned from chainlang.create', function(){
         ).to.throwException();
     });
 
-    it('constructs a chain object whose structure mirrors the language passed to chainlang.create', function(){
+    it('constructs a chain object whose prototype structure mirrors the language passed to chainlang.create', function(){
         var stubLang = {
             topLevelFn: function(){},
             topLevelProp: "someValue",
@@ -45,9 +45,8 @@ describe('A chain constructor returned from chainlang.create', function(){
         }
 
         var chainConstructor = chainlang.create(stubLang);
-        var chain = chainConstructor();
 
-        expect(allFieldsOfFirstAppearInSecond(stubLang, chain)).to.be(true);
+        expect(allFieldsOfFirstAppearInSecond(stubLang, chainConstructor())).to.be(true);
     });
 });
 
@@ -84,6 +83,21 @@ describe('A chain object', function(){
         expect(
             chain(actualSubject)._subject
         ).to.be.eql(actualSubject);
+    });
+
+    it('contains a "_return" method that breaks the chain and returns any value passed into it', function(){
+        var chain = chainlang.create({
+            someFn: function(){
+                return "I came from someFn";
+            },
+            iBreakTheChain: function(){
+                this._return(this._prev);
+            }
+        });
+
+        var result = chain().someFn().iBreakTheChain();
+
+        expect(result).to.be("I came from someFn")
     });
 
     it('allows chaining of methods arbitrarily nested within properties of the language', function(){
@@ -137,20 +151,6 @@ describe('A chain object', function(){
         expect(spy.thisValues[1]).to.be.eql(link);
     });
 
-    it('contains a "_return" propery that breaks the chain and returns its value when set', function(){
-        var chain = chainlang.create({
-            someFn: function(){
-                return "I came from someFn";
-            },
-            iBreakTheChain: function(){
-                this._return = this._prev;
-            }
-        });
-
-        var result = chain().someFn().iBreakTheChain();
-
-        expect(result).to.be("I came from someFn")
-    });
 });
 
 describe('The _data property of a chain', function(){
@@ -185,7 +185,7 @@ describe('Any node in the chain object graph', function(){
             prop: {
                 _invoke: spy,
                 methodsStillAvailable: function(){
-                    this._return = true;
+                    this._return(true);
                 }
             }
         });
@@ -199,13 +199,12 @@ describe('Any node in the chain object graph', function(){
     it('may include a "_wrapper" method, that accepts a callback used to apply a called decendant method onto the chain', function(){
         var lang = {
             returnsTrue: function(){
-                this._return = true;
+                this._return(true);
             }
         };
         lang.negator = {
             _wrapper: function(calledMethod){
-                calledMethod();
-                this._return = !(this._return);
+                this._return(!calledMethod());
             },
             returnsTrue: lang.returnsTrue
         };

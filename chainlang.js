@@ -3,14 +3,29 @@
  * File: chainlang.js
  */
 
+// TODO LIST:
+// 1 - Eliminate constructor call requirement by appending
+//     specialized versions of top-level fields to constructor itself.
+//      (They will call the constructor and "apply", most likely)
+// 2 - In examples, consider "shout" event library
+// 3 - In examples, consider "assume" setup library...
+//     ... Are there possible abstractions of common setup tasks?
+
 var chainlang = module.exports;
 
 chainlang.create = function(lang){
     if(arguments.length !== 1){
         throw "chainlang.create expects one argument: An object containing the methods of the new chain language";
     }
-    
+
+    // Static per-chain data    
     var theChain = createChainableProxy(lang);
+    theChain.__break__ = false;
+    theChain.__return__ = undefined;
+    theChain._return = function(returnValue){
+        theChain.__break__ = true;
+        theChain.__return__ = returnValue;
+    }
 
     function chain(obj){
         if(arguments.length > 1){
@@ -21,7 +36,6 @@ chainlang.create = function(lang){
         theChain._subject = obj;
         theChain._data = {};
         theChain._prev = null;
-        theChain._return = undefined;
         
         return theChain;
     }
@@ -89,16 +103,12 @@ function createChainableProxyNode(node, chain, language, wrappers){
 
 function createChainableProxiedMethod(chain, fn, wrappers){
     var i,
+        proxiedMethod,
         wrappers = captureArray(wrappers);
 
-    var proxiedMethod = function(){
+    proxiedMethod = function(){
         chain._prev = fn.apply(chain, arguments);
-
-        if(chain._return !== undefined){
-            return chain._return;
-        }
-
-        return chain;
+        return returnValue(chain);
     }
 
     if(wrappers.length > 0){
@@ -116,13 +126,17 @@ function createWrappedChainableMethod(chain, wrapperFunction, innerFunction){
         chain._prev = wrapperFunction.call(chain, function(){
             return innerFunction.apply(chain, args);
         });
-
-        if(chain._return !== undefined){
-            return chain._return;
-        }
-
-        return chain;
+        return returnValue(chain);
     }
+}
+
+// Returns chain.__return__ if chain.__break__ is set,
+// or else returns the chain
+function returnValue(chain){
+    if(chain.__break__){
+        return chain.__return__;
+    }
+    return chain;
 }
 
 // "Captures" an array. (i.e. makes a new array with the same references
