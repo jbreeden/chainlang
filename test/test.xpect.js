@@ -28,10 +28,9 @@ describe("xpect vs expect api comparison", function(){
     test("xpect([]).to.be.an('array')");
     test("xpect([]).to.be.an('object')");
     
-    // test("xpect(5).to.be.a(Number)");
-    // test("xpect([]).to.be.an(Array)");
-    // test("xpect(tobi).to.be.a(Ferret)");
-    // test("xpect(person).to.be.a(Mammal)");
+
+//    test("xpect(5).to.be.a(Number)");  ** EXPECT.JS DOES NOT SUCCEED AS EXPECTED **
+    test("xpect([]).to.be.an(Array)");
 
     // test("xpect(program.version).to.match(/[0-9]+\.[0-9]+\.[0-9]+/)");
     
