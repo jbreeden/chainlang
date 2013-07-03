@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Chainlang by jbreeden</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/jbreeden/chainlang">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/jbreeden/chainlang/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/jbreeden/chainlang/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Chainlang</h1>
+          <p>Utility for creating chainable methods and fluent interfaces</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/jbreeden">jbreeden</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a name="-under-construction-" class="anchor" href="#-under-construction-"><span class="octicon octicon-link"></span></a>!!! UNDER CONSTRUCTION !!!</h1>
+
+<p>Please, feel free to look around - so long as you don't judge me.</p>
+
+<h1>
+<a name="chainlang" class="anchor" href="#chainlang"><span class="octicon octicon-link"></span></a>chainlang</h1>
+
+<p>Chainlang is a utility for creating chainable methods and fluent interfaces.</p>
+
+<h1>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
+
+<p>TODO</p>
+
+<h1>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h1>
+
+<p>In this example, we'll implement a library dubbed <code>from</code> atop chainlang. The <code>from</code> library will provide basic
+collection querying/projecting facilities in a yoda-sql style api. <code>from</code> is defined as follows:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">chainlang</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'../chainlang.js'</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">fromSpec</span> <span class="o">=</span> <span class="p">{};</span>
+
+<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">where</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cond</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">cond</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">select</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">projector</span><span class="p">){</span>
+    <span class="c1">// If called with keys, create projector</span>
+    <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">projector</span> <span class="o">!==</span> <span class="s2">"function"</span><span class="p">){</span>
+        <span class="nx">projector</span> <span class="o">=</span> <span class="nx">makeProjectorForKeys</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">){</span>
+        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">projector</span><span class="p">(</span><span class="nx">el</span><span class="p">))</span>
+    <span class="p">});</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">first</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)){</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">last</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)){</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">length</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">all</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">makeProjectorForKeys</span><span class="p">(){</span>
+    <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="kd">function</span> <span class="nx">keysProjector</span><span class="p">(</span><span class="nx">el</span><span class="p">){</span>
+        <span class="kr">debugger</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">projection</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">){</span>
+            <span class="nx">projection</span><span class="p">[</span><span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">]]</span> <span class="o">=</span> <span class="nx">el</span><span class="p">[</span><span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">]];</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nx">projection</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">chainlang</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">fromSpec</span><span class="p">);</span>
+</pre></div>
+
+<p>As you can see from the above definition, <code>from</code> provides filtering via <code>where</code> and projection via <code>select</code>. <code>select</code> 
+accepts either a list of keys to project, or a mapping function that takes an element and returns the desired
+projection. As with all chainable methods, these methods return the object they were called on so that more method
+calls may be chained. So, to return the results of the filtering/projection, the methods <code>first</code>, <code>last</code>, and <code>all</code>
+are provided. Each of these methods utilizes the semi-private <code>_return</code> method of the chain object, which is provided
+to all chain languages created with <code>chainlang.create</code>. <code>_return</code> allows you to break the chain and return a value
+of your choosing.</p>
+
+<p>Ok, so <code>from</code> is small, but functional. Let's see it in action. Suppose we have a list of employees, the declaration of
+which looks like this:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">from</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./from'</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">employees</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="nx">id</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s2">"Thomas"</span><span class="p">,</span>
+        <span class="nx">role</span><span class="o">:</span> <span class="s2">"developer"</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="nx">id</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s2">"David"</span><span class="p">,</span>
+        <span class="nx">role</span><span class="o">:</span> <span class="s2">"manager"</span><span class="p">,</span>
+        <span class="nx">minions</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="nx">id</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s2">"Mark"</span><span class="p">,</span>
+        <span class="nx">role</span><span class="o">:</span> <span class="s2">"developer"</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="nx">id</span><span class="o">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="nx">name</span><span class="o">:</span> <span class="s2">"Brian"</span><span class="p">,</span>
+        <span class="nx">role</span><span class="o">:</span> <span class="s2">"developer"</span>
+    <span class="p">}</span>
+<span class="p">];</span>
+</pre></div>
+
+<p>This list includes three developers and one manager, David. David has two employees, and their employee IDs are listed
+in David's <code>minions</code> array. If we want to find all of David's minions, we could start by getting their IDs. Using
+<code>from</code>, we can:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">davidsMinionsIds</span> <span class="o">=</span> 
+    <span class="nx">from</span><span class="p">(</span><span class="nx">employees</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">employee</span><span class="p">){</span> 
+        <span class="k">return</span> <span class="nx">employee</span><span class="p">.</span><span class="nx">name</span> <span class="o">==</span> <span class="s2">"David"</span><span class="p">;</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">employee</span><span class="p">){</span>
+        <span class="k">return</span> <span class="nx">employee</span><span class="p">.</span><span class="nx">minions</span><span class="p">;</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">first</span><span class="p">();</span>
+</pre></div>
+
+<p>Thanks to <code>from</code>'s fluent api, this reads rather nicely as "from employees, where employee name is David, select
+employee's minions." Since select returns an array that we know will only have one element, we use <code>first</code> to break
+the chain and return the minion id array directly.</p>
+
+<p>Now that we have David's minions' IDs, we can get their employee objects. To do this, we'll use another <code>from</code> query:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">davidsMinions</span> <span class="o">=</span> 
+    <span class="nx">from</span><span class="p">(</span><span class="nx">employees</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">emp</span><span class="p">){</span>
+        <span class="k">return</span> <span class="nx">davidsMinionsIds</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">emp</span><span class="p">.</span><span class="nx">id</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">})</span>
+    <span class="p">.</span><span class="nx">all</span><span class="p">();</span>
+</pre></div>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
