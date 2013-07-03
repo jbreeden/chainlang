@@ -42,7 +42,7 @@ chainlang.create = function(lang){
             throw "Chain constructors can only accept one argument";
         }
 
-        // Resetting the per-lang singletons for the new expression
+        // Resetting the properties on `theChain` for the new expression
         theChain._subject = obj;
         theChain._data = {};
         theChain._prev = null;
