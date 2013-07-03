@@ -1,0 +1,199 @@
+    <section class="suite">
+      <h1>chainlang.create(lang)</h1>
+      <dl>
+        <dt>requires exactly one argument (representing the new chain language)</dt>
+        <dd><pre><code>expect(callCreateWithNoArgs).to.throwException();
+expect(callCreateWithTwoArgs).to.throwException();</code></pre></dd>
+        <dt>returns a chain constructor for the new language</dt>
+        <dd><pre><code>var newLang = chainlang.create({});
+expect(newLang).to.be.a('function');</code></pre></dd>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>A chain constructor returned from chainlang.create</h1>
+      <dl>
+        <dt>Accepts an optional argument, and throws if more than one argument is provided</dt>
+        <dd><pre><code>var chain = chainlang.create({});
+
+expect(
+    function(){chain();}
+).not.to.throwException();
+expect(
+    function(){chain({});}
+).not.to.throwException();
+expect(
+    function(){chain({}, {});}
+).to.throwException();</code></pre></dd>
+        <dt>constructs a chain object whose prototype structure mirrors the language passed to chainlang.create</dt>
+        <dd><pre><code>var stubLang = {
+    topLevelFn: function(){},
+    topLevelProp: &quot;someValue&quot;,
+    secondLevel: {
+        fn: function(){},
+        prop: &quot;someValue&quot;,
+        thirdLevel: {
+            fn: function(){},
+            prop: &quot;someValue&quot;
+        }
+    }
+}
+
+var chainConstructor = chainlang.create(stubLang);
+
+expect(allFieldsOfFirstAppearInSecond(stubLang, chainConstructor())).to.be(true);</code></pre></dd>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>A chain object</h1>
+      <dl>
+        <dt>contains a &quot;_prev&quot; property that always contains the return value of the last function in the chain</dt>
+        <dd><pre><code>var chain = chainlang.create(
+    {
+        returnsOne: function(){return 1;},
+        returnsTwo: function(){return 2;}
+    });
+
+link = chain().returnsOne();
+expect(link._prev).to.be(1);
+expect(link.returnsTwo()._prev).to.be(2);</code></pre></dd>
+        <dt>contains a &quot;_data&quot; property (which can be used to pass data through the chain)</dt>
+        <dd><pre><code>var link = chainlang.create({})();
+expect(link).to.have.key('_data');
+
+var hasOwnKey = false;
+for(var key in link._data){
+    if(link._data.hasOwnProperty(key)){
+        hasOwnKey = true;
+    }
+}
+expect(hasOwnKey).to.be(false);</code></pre></dd>
+        <dt>contains a &quot;_subject&quot; property, which references the optional parameter to the chain constructor if supplied</dt>
+        <dd><pre><code>var chain = chainlang.create({});
+var actualSubject = {iAm: &quot;theSubject&quot;};
+
+expect(
+    chain(actualSubject)._subject
+).to.be.eql(actualSubject);</code></pre></dd>
+        <dt>contains a &quot;_return&quot; method that breaks the chain and returns any value passed into it</dt>
+        <dd><pre><code>var chain = chainlang.create({
+    someFn: function(){
+        return &quot;I came from someFn&quot;;
+    },
+    iBreakTheChain: function(){
+        this._return(this._prev);
+    }
+});
+
+var result = chain().someFn().iBreakTheChain();
+
+expect(result).to.be(&quot;I came from someFn&quot;)</code></pre></dd>
+        <dt>allows chaining of methods arbitrarily nested within properties of the language</dt>
+        <dd><pre><code>var chain = chainlang.create(
+    {
+        topLevelFn : function(){
+            return 1;
+        },
+        secondLevel : {
+            fn : function (){
+                return this._prev + 1;
+            },
+            thirdLevel : {
+                fn : function(){
+                    return this._prev + 1;
+                }
+            }                    
+        }
+    });
+
+expect(
+    chain().topLevelFn()._prev
+).to.be(1);
+
+expect(
+    chain().topLevelFn().secondLevel.fn()._prev
+).to.be(2);
+
+expect(
+    chain().topLevelFn().secondLevel.thirdLevel.fn()._prev
+).to.be(2);
+
+expect(
+    chain().topLevelFn().secondLevel.fn().secondLevel.thirdLevel.fn()._prev
+).to.be(3);</code></pre></dd>
+        <dt>is bound to &quot;this&quot; for every method call in the chain, even for methods of child objects</dt>
+        <dd><pre><code>var spy = sinon.spy();
+
+var chain = chainlang.create({
+    topLevelFn: spy,
+    secondLevel: {
+        secondLevelFn: spy
+    }
+});
+
+var link = chain().topLevelFn().secondLevel.secondLevelFn();
+
+expect(spy.thisValues[0]).to.be.eql(link);
+expect(spy.thisValues[1]).to.be.eql(link);</code></pre></dd>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>The _data property of a chain</h1>
+      <dl>
+        <dt>is initally an empty object</dt>
+        <dd><pre><code>var chain = chainlang.create({});
+expect(chain()._data).to.be.eql({});</code></pre></dd>
+        <dt>persists for the life of the chain, and so can be used to share data between non-adjacent links in the chain</dt>
+        <dd><pre><code>var chain = chainlang.create({
+    setsData : function(){
+        this._data.field = 1;
+    },
+    doesNothing : function(){
+        return;
+    },
+    readsAndReturnsData: function(){
+        return this._data.field;
+    }
+});
+
+expect(
+    chain().setsData().doesNothing().readsAndReturnsData()._prev
+).to.be(1);</code></pre></dd>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>Any node in the chain object graph</h1>
+      <dl>
+        <dt>may include an &quot;_invoke&quot; method, that is executed in the chain if the property is called as a function</dt>
+        <dd><pre><code>var spy = sinon.spy();
+var chain = chainlang.create({
+    prop: {
+        _invoke: spy,
+        methodsStillAvailable: function(){
+            this._return(true);
+        }
+    }
+});
+
+chain().prop();
+
+expect(spy.called).to.be(true);
+expect(chain().prop.methodsStillAvailable()).to.be(true);</code></pre></dd>
+        <dt>may include a &quot;_wrapper&quot; method, used to wrap descendant functions to process args/output</dt>
+        <dd><pre><code>var lang = {
+    returnsArg: function(arg){
+        this._return(arg);
+    }
+};
+lang.negator = {
+    _wrapper: function(nestedfn, args){
+        this._return(!nestedfn(args[0]));
+    },
+    returnsArg: lang.returnsArg
+};
+
+var chain = chainlang.create(lang);
+
+expect(chain().returnsArg(true)).to.be(true);
+expect(chain().negator.returnsArg(true)).to.be(false);</code></pre></dd>
+      </dl>
+    </section>
