@@ -3,16 +3,6 @@
  * File: chainlang.js
  */
 
-// <!--
-// TODO LIST:
-// 1 - Eliminate constructor call requirement by appending
-//     specialized versions of top-level fields to constructor itself.
-//      (They will call the constructor and "apply", most likely)
-// 2 - In examples, consider "shout" event library
-// 3 - In examples, consider "assume" setup library...
-//     ... Are there possible abstractions of common setup tasks?
-// -->
-
 // chainlang
 // ---------
 
