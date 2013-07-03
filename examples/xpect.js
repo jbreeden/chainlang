@@ -52,6 +52,64 @@ function eql(expected){
     this._return(undefined);
 }
 
+function expectA(){
+    return function(type){
+        // Need to call with chain context
+        expectType.call(this, type, 'a');
+    }
+}
+
+function expectAn(){
+    return function(type){
+        // Need to call with chain context
+        expectType.call(this, type, 'an');
+    }
+}
+
+function expectType(type, indefiniteArticle){
+    var expectation = this._data.expectation = 
+        createExpectation(this._subject, "to be " + indefiniteArticle, type);
+
+    type = (type === 'array') ? 'Array' : type;
+
+    if((typeof this._subject === type)
+        || (this._subject.constructor.name === type)
+        || (this._subject.constructor === type))
+    {
+        this._return(undefined);
+        return;
+    }
+    expectation.fail();
+}
+
+function notWrapper(nested, args){
+    try{
+        result = nested.apply(args);
+    }
+    catch(ex){
+        this._return(undefined);
+        return;
+    }
+    this._data.expectation.verb = "not " + this._data.verb;
+    this._data.expectation.fail();
+}
+
+function createExpectation(object, verb, expected){
+    var expectation = { object: object, verb: verb, expected: expected};
+
+    expectation.failIf = function(cond){
+        if(cond){
+            this.fail();
+        }
+    };
+
+    expectation.fail = function(){
+        throw "xpected " + this.object + " " + this.verb + " " + this.expected;
+    };
+
+    return expectation;
+}
+
 function objEquiv (a, b) {
     if (a === null || a === undefined || b === null || b === undefined)
       return false;
@@ -107,61 +165,3 @@ function areEql(actual, expected) {
       return objEquiv(actual, expected);
     }
 };
-
-function expectA(){
-    return function(type){
-        // Need to call with chain context
-        expectType.call(this, type, 'a');
-    }
-}
-
-function expectAn(){
-    return function(type){
-        // Need to call with chain context
-        expectType.call(this, type, 'an');
-    }
-}
-
-function expectType(type, indefiniteArticle){
-    var expectation = this._data.expectation = 
-        createExpectation(this._subject, "to be " + indefiniteArticle, type);
-
-    type = (type === 'array') ? 'Array' : type;
-
-    if((typeof this._subject === type)
-        || (this._subject.constructor.name === type)
-        || (this._subject.constructor === type))
-    {
-        this._return(undefined);
-        return;
-    }
-    expectation.fail();
-}
-
-function notWrapper(nested){
-    try{
-        result = nested();
-    }
-    catch(ex){
-        this._return(undefined);
-        return;
-    }
-    this._data.expectation.verb = "not " + this._data.verb;
-    this._data.expectation.fail();
-}
-
-function createExpectation(object, verb, expected){
-    var expectation = { object: object, verb: verb, expected: expected};
-
-    expectation.failIf = function(cond){
-        if(cond){
-            this.fail();
-        }
-    };
-
-    expectation.fail = function(){
-        throw "xpected " + this.object + " " + this.verb + " " + this.expected;
-    };
-
-    return expectation;
-}

@@ -63,7 +63,7 @@ describe('A chain object', function(){
         expect(link.returnsTwo()._prev).to.be(2);
     });
 
-    it('contains a "_data" property (which can be used to pass data through the chain)', function(){
+    it('contains a "_data" property which can be used to pass data through the chain and is initially empty', function(){
         var link = chainlang.create({})();
         expect(link).to.have.key('_data');
 
@@ -196,23 +196,23 @@ describe('Any node in the chain object graph', function(){
         expect(chain().prop.methodsStillAvailable()).to.be(true);
     });
 
-    it('may include a "_wrapper" method, that accepts a callback used to apply a called decendant method onto the chain', function(){
+    it('may include a "_wrapper" method, used to wrap descendant functions to process args/output', function(){
         var lang = {
-            returnsTrue: function(){
-                this._return(true);
+            returnsArg: function(arg){
+                this._return(arg);
             }
         };
         lang.negator = {
-            _wrapper: function(calledMethod){
-                this._return(!calledMethod());
+            _wrapper: function(nestedfn, args){
+                this._return(!nestedfn(args[0]));
             },
-            returnsTrue: lang.returnsTrue
+            returnsArg: lang.returnsArg
         };
 
         var chain = chainlang.create(lang);
 
-        expect(chain().returnsTrue()).to.be(true);
-        expect(chain().negator.returnsTrue()).to.be(false);
+        expect(chain().returnsArg(true)).to.be(true);
+        expect(chain().negator.returnsArg(true)).to.be(false);
     });
 });
 
