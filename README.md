@@ -8,7 +8,9 @@ Chainlang is a utility for creating chainable methods and fluent interfaces.
 
 # Features
 
-TODO
+TODO <br/>
+For now, have a look at the [annotated source](http://jbreeden.github.io/chainlang/source.html)
+and the [spec](http://jbreeden.github.io/chainlang/spec.html)
 
 # Example
 
