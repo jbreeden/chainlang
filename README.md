@@ -8,7 +8,8 @@ Chainlang is a utility for creating chainable methods and fluent interfaces.
 
 # Features
 
-TODO <br/>
+They're sweet, I assure you... but I can't tell you about them yet.
+
 For now, have a look at the [annotated source](http://jbreeden.github.io/chainlang/source.html)
 and the [spec](http://jbreeden.github.io/chainlang/spec.html)
 
@@ -143,3 +144,5 @@ var davidsMinions =
     })
     .all();
 ```
+
+(To be continued... and improved...)
