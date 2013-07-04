@@ -164,13 +164,7 @@ function createChainableProxiedMethod(chain, fn, wrappers){
 
 function createWrappedChainableMethod(chain, wrapperFunction, proxiedMethod){
     return function(){
-        var args = [];
-        for(var i = 0; i < arguments.length; ++i){
-            args.push(arguments[i]);
-        }
-
-        chain._prev = wrapperFunction.call(chain, proxiedMethod, args);
-
+        chain._prev = wrapperFunction.call(chain, proxiedMethod, arguments);
         return returnValue(chain);
     }
 }
