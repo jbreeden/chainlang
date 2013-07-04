@@ -110,32 +110,30 @@ function createChainableProxyNode(node, chain, language, wrappers){
         }
 
         var prop = language[propName];
-
-        switch(typeof prop){
-            case "function" :
-                node[propName] = createChainableProxiedMethod(chain, prop, wrappers);
-                break;
-            case "object" : 
-                node[propName] = makeBaseNode(chain, wrappers, prop);
-                createChainableProxyNode(node[propName], chain, prop, wrappers);
-                break;
-            default:
-                node[propName] = prop;
+        if(prop === undefined || prop === null){
+           continue;
+        }
+        
+        var makeNode = true;
+        if(typeof prop == "function"){
+            node[propName] = createChainableProxiedMethod(chain, prop, wrappers);
+        }
+        else if(typeof prop == "object"){
+            node[propName] = {};
+        }
+        else{
+            makeNode = false;
+            node[propName] = prop;
+        }
+        
+        if(makeNode){
+            createChainableProxyNode(node[propName], chain, prop, wrappers);
         }
     }
 
     if(hasWrapper){
         wrappers.pop();
     }
-}
-
-function makeBaseNode(chain, wrappers, obj){
-    if(obj['_invoke'] !== undefined 
-       && (typeof obj['_invoke'] == 'function'))
-    {
-        return createChainableProxiedMethod(chain, obj['_invoke'], wrappers);        
-    }
-    return {};
 }
 
 function hasWrapperMethod(obj){

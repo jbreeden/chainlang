@@ -136,6 +136,7 @@ describe('A chain object', function(){
     });
 
     it('is bound to "this" for every method call in the chain, even for methods of child objects', function(){
+        debugger;
         var spy = sinon.spy();
 
         var chain = chainlang.create({
@@ -179,16 +180,16 @@ describe('The _data property of a chain', function(){
 });
 
 describe('Any node in the chain object graph', function(){
-    it('may include an "_invoke" method, that is executed in the chain if the property is called as a function', function(){
+    it('may include child nodes, even if it is a method', function(){
         var spy = sinon.spy();
-        var chain = chainlang.create({
-            prop: {
-                _invoke: spy,
-                methodsStillAvailable: function(){
-                    this._return(true);
-                }
-            }
-        });
+        
+        var chainSpec = {};
+        chainSpec.prop = spy;
+        chainSpec.prop.methodsStillAvailable = function(){
+            this._return(true);
+        }
+        
+        var chain = chainlang.create(chainSpec);
 
         chain().prop();
 
