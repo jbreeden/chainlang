@@ -39,148 +39,53 @@
 <h1>
 <a name="chainlang" class="anchor" href="#chainlang"><span class="octicon octicon-link"></span></a>Chainlang</h1>
 
-<p>Chainlang is a utility for easily creating chainable methods and complex fluent APIs (or fluent interfaces).</p>
+<p>Chainlang is a utility for easily creating chainable methods and complex fluent APIs (or fluent interfaces) in JavaScript.</p>
 
 <p>With chainlang, you define the hierarchical structure of your fluent API as an object with methods. These methods may exist on the top level object, or be arbitrarily nested within child objects. After you've defined this structure representing your new "chain language" (we'll call it your "language spec") you pass it to <code>chainlang.create</code> which takes care of details like making methods chainable, or allowing links in a chained expression to share data.</p>
+
+<p>So, for example, with a language defined like this:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">fromSpec</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">where</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cond</span><span class="p">){</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">cond</span><span class="p">);</span>
+    <span class="p">},</span>
+    <span class="nx">take</span><span class="o">:</span> <span class="p">{</span>
+        <span class="nx">all</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">from</span> <span class="o">=</span> <span class="nx">chainlang</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">fromSpec</span><span class="p">);</span>
+</pre></div>
+
+<p>we would then be able to:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">];</span>
+
+<span class="kd">var</span> <span class="nx">evens</span> <span class="o">=</span> 
+    <span class="nx">from</span><span class="p">(</span><span class="nx">numbers</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">){</span>
+        <span class="k">return</span> <span class="nx">num</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span> 
+    <span class="p">}).</span><span class="nx">take</span><span class="p">.</span><span class="nx">all</span><span class="p">();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">evens</span><span class="p">);</span> <span class="c1">// Logs: [ 2, 4, 6 ]</span>
+</pre></div>
+
+<p>Granted, this isn't the most feature-filled API ever created (we'll be extending it later), but it was incredibly simple to define. There are no closures to capture the argument to the <code>from(...)</code> function, it is simply accessible by any method in our language spec, at any level in the hierarchy, as <code>this._subject</code>.</p>
+
+<p>Also, no care was taken to return <code>this</code> from the methods of <code>fromSpec</code>. In fact, <code>fromSpec.where</code> returns a boolean, but we're still able to chain a call such as <code>from(numbers).where(cond).take.all()</code>. That's because <code>chainlang.create</code> creates a copy of its argument (the language spec) where all methods are proxied. The proxied methods all have their <code>this</code> context bound to a chain object, and they all return the same chain object.</p>
+
+<p>So, what happens if you want to return a value? Just as in <code>fromSpec.take.all</code> above, you call <code>this._return</code> with some argument. This sets a flag on the chain object itself that tells the proxied methods to break the chain and return whatever value you've provided. (Note: this call does not actually cause your method to return, it just sets up a return value. If you call <code>this._return</code> again before your method finishes, you will overwrite the previous return value.)</p>
 
 <h1>
 <a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
 
-<p>The feature set is still in flux and so isn't fully documented yet.</p>
+<p>UA-42220461-1
+The feature set is still in flux and so isn't fully documented yet.</p>
 
 <p>For now, have a look at a snapshot of the <a href="http://jbreeden.github.io/chainlang/source.html">annotated source</a>
 and the <a href="http://jbreeden.github.io/chainlang/spec.html">spec</a></p>
-
-<h1>
-<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h1>
-
-<p>In this example, we'll implement a library dubbed <code>from</code> atop chainlang. The <code>from</code> library will provide basic
-collection querying/projecting facilities in a yoda-sql style api. <code>from</code> is defined as follows:</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">chainlang</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'../chainlang.js'</span><span class="p">);</span>
-
-<span class="kd">var</span> <span class="nx">fromSpec</span> <span class="o">=</span> <span class="p">{};</span>
-
-<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">where</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cond</span><span class="p">){</span>
-    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">cond</span><span class="p">);</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">select</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">projector</span><span class="p">){</span>
-    <span class="c1">// If called with keys, create projector</span>
-    <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">projector</span> <span class="o">!==</span> <span class="s2">"function"</span><span class="p">){</span>
-        <span class="nx">projector</span> <span class="o">=</span> <span class="nx">makeProjectorForKeys</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">){</span>
-        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">projector</span><span class="p">(</span><span class="nx">el</span><span class="p">))</span>
-    <span class="p">});</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span> <span class="o">=</span> <span class="nx">result</span><span class="p">;</span>
-<span class="p">}</span>
-
-<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">first</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
-    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)){</span>
-        <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
-<span class="p">}</span>
-
-<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">last</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
-    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)){</span>
-        <span class="k">return</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">length</span><span class="p">]);</span>
-<span class="p">}</span>
-
-<span class="nx">fromSpec</span><span class="p">.</span><span class="nx">all</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
-    <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="kd">function</span> <span class="nx">makeProjectorForKeys</span><span class="p">(){</span>
-    <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">;</span>
-
-    <span class="k">return</span> <span class="kd">function</span> <span class="nx">keysProjector</span><span class="p">(</span><span class="nx">el</span><span class="p">){</span>
-        <span class="kr">debugger</span><span class="p">;</span>
-        <span class="kd">var</span> <span class="nx">projection</span> <span class="o">=</span> <span class="p">{};</span>
-        <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">args</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="o">++</span><span class="nx">i</span><span class="p">){</span>
-            <span class="nx">projection</span><span class="p">[</span><span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">]]</span> <span class="o">=</span> <span class="nx">el</span><span class="p">[</span><span class="nx">args</span><span class="p">[</span><span class="nx">i</span><span class="p">]];</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="nx">projection</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">chainlang</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">fromSpec</span><span class="p">);</span>
-</pre></div>
-
-<p>As you can see from the above definition, <code>from</code> provides filtering via <code>where</code> and projection via <code>select</code>. <code>select</code> 
-accepts either a list of keys to project, or a mapping function that takes an element and returns the desired
-projection. As with all chainable methods, these methods return the object they were called on so that more method
-calls may be chained. So, to return the results of the filtering/projection, the methods <code>first</code>, <code>last</code>, and <code>all</code>
-are provided. Each of these methods utilizes the semi-private <code>_return</code> method of the chain object, which is provided
-to all chain languages created with <code>chainlang.create</code>. <code>_return</code> allows you to break the chain and return a value
-of your choosing.</p>
-
-<p>Ok, so <code>from</code> is small, but functional. Let's see it in action. Suppose we have a list of employees, the declaration of
-which looks like this:</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">from</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./from'</span><span class="p">);</span>
-
-<span class="kd">var</span> <span class="nx">employees</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span>
-        <span class="nx">id</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="nx">name</span><span class="o">:</span> <span class="s2">"Thomas"</span><span class="p">,</span>
-        <span class="nx">role</span><span class="o">:</span> <span class="s2">"developer"</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="nx">id</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="nx">name</span><span class="o">:</span> <span class="s2">"David"</span><span class="p">,</span>
-        <span class="nx">role</span><span class="o">:</span> <span class="s2">"manager"</span><span class="p">,</span>
-        <span class="nx">minions</span><span class="o">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="nx">id</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="nx">name</span><span class="o">:</span> <span class="s2">"Mark"</span><span class="p">,</span>
-        <span class="nx">role</span><span class="o">:</span> <span class="s2">"developer"</span>
-    <span class="p">},</span>
-    <span class="p">{</span>
-        <span class="nx">id</span><span class="o">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="nx">name</span><span class="o">:</span> <span class="s2">"Brian"</span><span class="p">,</span>
-        <span class="nx">role</span><span class="o">:</span> <span class="s2">"developer"</span>
-    <span class="p">}</span>
-<span class="p">];</span>
-</pre></div>
-
-<p>This list includes three developers and one manager, David. David has two employees, and their employee IDs are listed
-in David's <code>minions</code> array. If we want to find all of David's minions, we could start by getting their IDs. Using
-<code>from</code>, we can:</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">davidsMinionsIds</span> <span class="o">=</span> 
-    <span class="nx">from</span><span class="p">(</span><span class="nx">employees</span><span class="p">)</span>
-    <span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">employee</span><span class="p">){</span> 
-        <span class="k">return</span> <span class="nx">employee</span><span class="p">.</span><span class="nx">name</span> <span class="o">==</span> <span class="s2">"David"</span><span class="p">;</span>
-    <span class="p">})</span>
-    <span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">employee</span><span class="p">){</span>
-        <span class="k">return</span> <span class="nx">employee</span><span class="p">.</span><span class="nx">minions</span><span class="p">;</span>
-    <span class="p">})</span>
-    <span class="p">.</span><span class="nx">first</span><span class="p">();</span>
-</pre></div>
-
-<p>Thanks to <code>from</code>'s fluent api, this reads rather nicely as "from employees, where employee name is David, select
-employee's minions." Since select returns an array that we know will only have one element, we use <code>first</code> to break
-the chain and return the minion id array directly.</p>
-
-<p>Now that we have David's minions' IDs, we can get their employee objects. To do this, we'll use another <code>from</code> query:</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">davidsMinions</span> <span class="o">=</span> 
-    <span class="nx">from</span><span class="p">(</span><span class="nx">employees</span><span class="p">)</span>
-    <span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">emp</span><span class="p">){</span>
-        <span class="k">return</span> <span class="nx">davidsMinionsIds</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">emp</span><span class="p">.</span><span class="nx">id</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
-    <span class="p">})</span>
-    <span class="p">.</span><span class="nx">all</span><span class="p">();</span>
-</pre></div>
-
-<p>(To be continued... and improved...)</p>
       </section>
     </div>
 
