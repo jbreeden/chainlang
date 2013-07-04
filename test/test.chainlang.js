@@ -217,6 +217,38 @@ describe('Any node in the chain object graph', function(){
     });
 });
 
+describe('wrappers', function(){
+    it('may be arbitrarily nested', function(){
+        var lang = {
+            returnsArg: function(arg){
+                this._return(arg);
+            }
+        };
+        lang.negator = {
+            _wrapper: function(nestedfn, args){
+                this._return(!nestedfn(args[0]));
+            },
+            returnsArg: function(arg){
+                return arg;
+            },
+            negator: {
+                _wrapper: function(nestedfn, args){
+                    this._return(!nestedfn(args[0]));
+                },
+                returnsArg: function(arg){
+                    return arg;
+                }
+            }
+        };
+
+        var chain = chainlang.create(lang);
+
+        expect(chain().returnsArg(true)).to.be(true);
+        expect(chain().negator.returnsArg(true)).to.be(false);
+        expect(chain().negator.negator.returnsArg(true)).to.be(true);
+    });
+});
+
 function allFieldsOfFirstAppearInSecond(obj1, obj2){
     var props1 = [];
     getAllPropertyNameStrings(props1, obj1, "");

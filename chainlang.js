@@ -162,19 +162,15 @@ function createChainableProxiedMethod(chain, fn, wrappers){
     return proxiedMethod;
 }
 
-function createWrappedChainableMethod(chain, wrapperFunction, innerFunction){
+function createWrappedChainableMethod(chain, wrapperFunction, proxiedMethod){
     return function(){
-
-        var appliedInnerFunction = function(){
-            return innerFunction.apply(chain, arguments);
-        };
-
         var args = [];
         for(var i = 0; i < arguments.length; ++i){
             args.push(arguments[i]);
         }
 
-        chain._prev = wrapperFunction.call(chain, appliedInnerFunction, args);
+        chain._prev = wrapperFunction.call(chain, proxiedMethod, args);
+
         return returnValue(chain);
     }
 }
