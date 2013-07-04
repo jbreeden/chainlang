@@ -20,6 +20,16 @@ fromSpec.select = function(projector){
     this._subject = result;
 }
 
+// Accepts a variable number of arrays, and appends each element
+// of each array onto this._subject
+fromSpec.union = function(){
+    for(var arg = 0; arg < arguments.length; ++arg){
+        for(var el = 0; el < arguments[arg].length; ++el){
+            this._subject.push(arguments[arg][el]);
+        }
+    }
+}
+
 fromSpec.first = function(){
     if(!(this._subject.length >= 1)){
         return;
@@ -36,6 +46,10 @@ fromSpec.last = function(){
 
 fromSpec.all = function(){
     this._return(this._subject);
+}
+
+fromSpec.take = function(count){
+    this._return(this._subject.slice(0, count));
 }
 
 function makeProjectorForKeys(){

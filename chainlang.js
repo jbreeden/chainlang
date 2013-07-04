@@ -43,10 +43,6 @@ chainlang.create = function(lang){
     // interleaved with other chain expressions of the same language.
     var theChain = createChainableProxy(lang);
 
-    // Super-secret values used by `_return` method
-    theChain.__break__ = false;
-    theChain.__return__ = undefined;
-
     // `_return` is used to break the chain and return a value
     theChain._return = function(returnValue){
         theChain.__break__ = true;
@@ -67,6 +63,8 @@ chainlang.create = function(lang){
         theChain._subject = obj;
         theChain._data = {};
         theChain._prev = null;
+        theChain.__break__ = false;
+        theChain.__return__ = undefined;
 
         return theChain;
     }
