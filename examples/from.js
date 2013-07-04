@@ -18,7 +18,7 @@ fromSpec.take = function(count){
     var result = [];
     /* this._subject is initialized with the argument to from(...) */
     for(i = 0; i < this._subject.length && i < count; ++i){
-        result.push(this._subject.shift());
+        result.push(this._subject[i]);
     }
     
     /* `this._return` is used to break the chain and return a value */
@@ -52,7 +52,7 @@ fromSpec.take.last = function(){
     if(!(this._subject.length >= 1)){
         this._return();
     }
-    this._return(this._subject[this._subject.length]);
+    this._return(this._subject[this._subject.length - 1]);
 }
 
 // **where** accepts a function, `cond`, and uses it to
