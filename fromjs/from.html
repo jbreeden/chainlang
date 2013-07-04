@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>from.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>from.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>In this walkthrough, we&#39;ll be creating a full-fledged <code>from</code>
+library with a fluent API using chainlang.</p>
+<hr>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Require chainlang</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> chainlang = require(<span class="string">'../chainlang'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Declaring our <code>fromSpec</code> obect</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> fromSpec = {};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p><strong>take</strong> returns either <code>count</code> elements of <code>_subject</code>,
+or <code>_subject.length</code> elements, whichever is lower.  </p>
+<pre>
+from(array).take(count);
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>fromSpec.take = <span class="keyword">function</span>(count){
+    <span class="keyword">var</span> result = [];
+    <span class="comment">/* this._subject is initialized with the argument to from(...) */</span>
+    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._subject.length &amp;&amp; i &lt; count; ++i){
+        result.push(<span class="keyword">this</span>._subject.shift());
+    }
+    
+    <span class="comment">/* `this._return` is used to break the chain and return a value */</span>
+    <span class="keyword">this</span>._<span class="keyword">return</span>(result);
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p><strong>take.all</strong> returns all of the elements of <code>_subject</code></p>
+<pre>
+from(array).take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>fromSpec.take.all = <span class="keyword">function</span>(){
+    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p><strong>take.first</strong> returns the first element of <code>_subject</code></p>
+<pre>
+from(array).take.first();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>fromSpec.take.first = <span class="keyword">function</span>(){
+    <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
+        <span class="keyword">this</span>._<span class="keyword">return</span>();
+    }
+    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject[<span class="number">0</span>]);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p><strong>take.last</strong> returns the last element of <code>_subject</code></p>
+<pre>
+from(array).take.last();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>fromSpec.take.last = <span class="keyword">function</span>(){
+    <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
+        <span class="keyword">this</span>._<span class="keyword">return</span>();
+    }
+    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject[<span class="keyword">this</span>._subject.length]);
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p><strong>where</strong> accepts a function, <code>cond</code>, and uses it to
+filter the <code>_subject</code> array</p>
+<pre>
+from(array).where(cond).take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>fromSpec.where = <span class="keyword">function</span>(cond){
+    <span class="keyword">this</span>._subject = <span class="keyword">this</span>._subject.filter(cond);
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p><strong>select</strong> accepts either a list of property
+names to project for each element, or a mapping
+function, <code>projector</code>, used to transform each
+element in the array.  </p>
+<pre>
+from(array).select("name", "id").take.all();
+from(array).select(projectoreFn).take.all();
+from(array)
+    .where(function(el){ el != null; })
+    .select("name")
+    .take.all();
+from(array)
+    .select("name")
+    .where(function(el){ el != null; })
+    .take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>fromSpec.select = <span class="keyword">function</span>(projector){
+    <span class="keyword">if</span>(<span class="keyword">typeof</span> projector !== <span class="string">"function"</span>){
+        projector = makeProjectorForKeys.apply(<span class="literal">null</span>, arguments);
+    }
+
+    <span class="keyword">var</span> result = [];
+    <span class="keyword">this</span>._subject.forEach(<span class="keyword">function</span>(el){
+        result.push(projector(el))
+    });
+    <span class="keyword">this</span>._subject = result;
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">makeProjectorForKeys</span><span class="params">()</span>{</span>
+    <span class="keyword">var</span> args = arguments;
+    
+    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">keysProjector</span><span class="params">(el)</span>{</span>
+        debugger;
+        <span class="keyword">var</span> projection = {};
+        <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; args.length; ++i){
+            projection[args[i]] = el[args[i]];
+        }
+        <span class="keyword">return</span> projection;
+    }
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p><strong>union</strong> accepts a variable number of arrays, and appends each element
+of each array onto this._subject</p>
+<pre>
+/* Getting all objects of array1, array2[, array3]...
+   with id == 2 */
+from(array1)
+    .union(array2[, array3]...)
+    .where(function(el){ return el.id == 2; })
+    .take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>fromSpec.union = <span class="keyword">function</span>(){
+    <span class="keyword">for</span>(<span class="keyword">var</span> arg = <span class="number">0</span>; arg &lt; arguments.length; ++arg){
+        <span class="keyword">for</span>(<span class="keyword">var</span> el = <span class="number">0</span>; el &lt; arguments[arg].length; ++el){
+            <span class="keyword">this</span>._subject.push(arguments[arg][el]);
+        }
+    }
+};
+
+module.exports = chainlang.create(fromSpec);</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

@@ -56,7 +56,7 @@ expect(allFieldsOfFirstAppearInSecond(stubLang, chainConstructor())).to.be(true)
 link = chain().returnsOne();
 expect(link._prev).to.be(1);
 expect(link.returnsTwo()._prev).to.be(2);</code></pre></dd>
-        <dt>contains a &quot;_data&quot; property (which can be used to pass data through the chain)</dt>
+        <dt>contains a &quot;_data&quot; property which can be used to pass data through the chain and is initially empty</dt>
         <dd><pre><code>var link = chainlang.create({})();
 expect(link).to.have.key('_data');
 
@@ -121,7 +121,8 @@ expect(
     chain().topLevelFn().secondLevel.fn().secondLevel.thirdLevel.fn()._prev
 ).to.be(3);</code></pre></dd>
         <dt>is bound to &quot;this&quot; for every method call in the chain, even for methods of child objects</dt>
-        <dd><pre><code>var spy = sinon.spy();
+        <dd><pre><code>debugger;
+var spy = sinon.spy();
 
 var chain = chainlang.create({
     topLevelFn: spy,
@@ -163,16 +164,16 @@ expect(
     <section class="suite">
       <h1>Any node in the chain object graph</h1>
       <dl>
-        <dt>may include an &quot;_invoke&quot; method, that is executed in the chain if the property is called as a function</dt>
+        <dt>may include child nodes, even if it is a method</dt>
         <dd><pre><code>var spy = sinon.spy();
-var chain = chainlang.create({
-    prop: {
-        _invoke: spy,
-        methodsStillAvailable: function(){
-            this._return(true);
-        }
-    }
-});
+
+var chainSpec = {};
+chainSpec.prop = spy;
+chainSpec.prop.methodsStillAvailable = function(){
+    this._return(true);
+}
+
+var chain = chainlang.create(chainSpec);
 
 chain().prop();
 
