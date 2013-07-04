@@ -84,7 +84,7 @@ from(array).take(count);
     <span class="keyword">var</span> result = [];
     <span class="comment">/* this._subject is initialized with the argument to from(...) */</span>
     <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._subject.length &amp;&amp; i &lt; count; ++i){
-        result.push(<span class="keyword">this</span>._subject.shift());
+        result.push(<span class="keyword">this</span>._subject[i]);
     }
     
     <span class="comment">/* `this._return` is used to break the chain and return a value */</span>
@@ -154,7 +154,7 @@ from(array).take.last();
     <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
         <span class="keyword">this</span>._<span class="keyword">return</span>();
     }
-    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject[<span class="keyword">this</span>._subject.length]);
+    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject[<span class="keyword">this</span>._subject.length - <span class="number">1</span>]);
 }</pre></div></div>
             
         </li>
