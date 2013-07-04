@@ -72,19 +72,20 @@
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">evens</span><span class="p">);</span> <span class="c1">// Logs: [ 2, 4, 6 ]</span>
 </pre></div>
 
-<p>Granted, this isn't the most feature-filled API ever created (we'll be extending it later), but it was incredibly simple to define. There are no closures to capture the argument to the <code>from(...)</code> function, it is simply accessible by any method in our language spec, at any level in the hierarchy, as <code>this._subject</code>.</p>
+<p>Granted, this isn't the most feature-filled API ever created (<a href="http://jbreeden.github.io/chainlang/fromjs/from.html">yet</a>), but it was incredibly simple to define. There are no closures to capture the argument to the <code>from(...)</code> function, it is simply accessible by any method in our language spec, at any level in the hierarchy, as <code>this._subject</code>.</p>
 
 <p>Also, no care was taken to return <code>this</code> from the methods of <code>fromSpec</code>. In fact, <code>fromSpec.where</code> returns a boolean, but we're still able to chain a call such as <code>from(numbers).where(cond).take.all()</code>. That's because <code>chainlang.create</code> creates a copy of its argument (the language spec) where all methods are proxied. The proxied methods all have their <code>this</code> context bound to a chain object, and they all return the same chain object.</p>
 
 <p>So, what happens if you want to return a value? Just as in <code>fromSpec.take.all</code> above, you call <code>this._return</code> with some argument. This sets a flag on the chain object itself that tells the proxied methods to break the chain and return whatever value you've provided. (Note: this call does not actually cause your method to return, it just sets up a return value. If you call <code>this._return</code> again before your method finishes, you will overwrite the previous return value.)</p>
 
 <h1>
-<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
+<a name="more-information" class="anchor" href="#more-information"><span class="octicon octicon-link"></span></a>More Information</h1>
 
-<p>The feature set is still in flux and so isn't fully documented yet.</p>
-
-<p>For now, have a look at a snapshot of the <a href="http://jbreeden.github.io/chainlang/source/chainlang.html">annotated source</a>
-and the <a href="http://jbreeden.github.io/chainlang/spec/spec.html">spec</a></p>
+<ul>
+<li><a href="http://jbreeden.github.io/chainlang/fromjs/from.html">Walkthrough: Creating a full-feature fromjs library</a></li>
+<li><a href="http://jbreeden.github.io/chainlang/source/chainlang.html">annotated source</a></li>
+<li><a href="http://jbreeden.github.io/chainlang/spec/spec.html">spec</a></li>
+</ul>
       </section>
     </div>
 
