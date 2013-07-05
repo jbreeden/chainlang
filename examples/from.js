@@ -123,4 +123,91 @@ fromSpec.union = function(){
     }
 };
 
+fromSpec.left = {
+    _wrapper: function(called, args){
+        this._data.joinType = 'left';
+        return called(args);
+    },
+    join: join
+};
+
+fromSpec.right = {
+    _wrapper: function(called, args){
+        this._data.joinType = 'right';
+        return called(args);
+    },
+    join: join
+};
+
+function join(right){
+    this._data.left = this._subject;
+    this._data.right = right;
+
+    this._persist = true;
+}
+
+join.on = function(key, isStrict){
+    var outter,
+        outterPrefix,
+        inner,
+        innerPrefix,
+        result = [],
+        resultItem = {};
+
+    if(this._data.joinType === 'left'){
+        outter = this._data.left;
+        outterPrefix = 'left';
+        inner = this._data.right;
+        innerPrefix = 'right'
+    }
+    else if(this._data.joinType === 'right'){
+        outter = this._data.right;
+        outterPrefix = 'right';
+        inner = this._data.left;
+        innerPrefix = 'left'
+    } else{
+        throw 'invalid join type';
+    }
+
+    var compare = isStrict ? strictCompare : looseCompare;
+
+    outter.forEach(function(outterEl){
+        var matched = false;
+        
+        inner.forEach(function(innerEl){
+            if(compare(outterEl[key], innerEl[key])){
+                matched = true;
+                
+                resultItem = {};
+                resultItem[innerPrefix] = {};
+                resultItem[outterPrefix] = {};
+                Object.keys(innerEl).forEach(function(innerKey){
+                    resultItem[innerPrefix][innerKey] = innerEl[innerKey];
+                });
+                Object.keys(outterEl).forEach(function(outterKey){
+                    resultItem[outterPrefix][outterKey] = outterEl[outterKey];
+                });
+            }
+        })
+        
+        if(!matched){
+            resultItem = {};
+            resultItem[outterPrefix] = {};
+            resultItem[innerPrefix] = null;
+            Object.keys(outterEl).forEach(function(outterKey){
+                resultItem[outterPrefix][outterKey] = outterEl[outterKey];
+            });
+        }
+    });
+
+};
+
+function strictCompare(first, second){
+    return first === second;
+}
+
+function looseCompare(first, second){
+    return first == second;
+}
+
 module.exports = chainlang.create(fromSpec);
