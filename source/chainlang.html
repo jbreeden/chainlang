@@ -189,9 +189,11 @@ of the new <code>chainlang</code> type.
             <div class="content"><div class='highlight'><pre>        theChain._subject = obj;
         theChain._data = {};
         theChain._prev = <span class="literal">null</span>;
+        theChain._nextLink = <span class="literal">null</span>;
         theChain.__break__ = <span class="literal">false</span>;
         theChain.__return__ = <span class="literal">undefined</span>;
-
+        theChain.__stack_height__ = <span class="number">0</span>;
+        
         <span class="keyword">return</span> theChain;
     }</pre></div></div>
             
@@ -334,34 +336,23 @@ we&#39;ll just ignore any we come across. May want to throw an error later.</p>
         wrappers = captureArray(wrappers);
 
     proxiedMethod = <span class="keyword">function</span>(){
+        chain.__stack_height__ = wrappers.length;
         chain._prev = fn.apply(chain, arguments);
         <span class="keyword">return</span> returnValue(chain);
     }
 
     <span class="keyword">if</span>(wrappers.length &gt; <span class="number">0</span>){
         <span class="keyword">for</span>(i = wrappers.length - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i -= <span class="number">1</span>){
-            proxiedMethod = createWrappedChainableMethod(chain, wrappers[i], proxiedMethod);
+            proxiedMethod = createWrappedChainableMethod({
+                    chain: chain,
+                    wrapperFunction: wrappers[i],
+                    proxiedMethod: proxiedMethod,
+                    stackHeight: i
+                });
         }
     }
 
     <span class="keyword">return</span> proxiedMethod;
-}
-
-<span class="function"><span class="keyword">function</span> <span class="title">createWrappedChainableMethod</span><span class="params">(chain, wrapperFunction, innerFunction)</span>{</span>
-    <span class="keyword">return</span> <span class="keyword">function</span>(){
-
-        <span class="keyword">var</span> appliedInnerFunction = <span class="keyword">function</span>(){
-            <span class="keyword">return</span> innerFunction.apply(chain, arguments);
-        };
-
-        <span class="keyword">var</span> args = [];
-        <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; arguments.length; ++i){
-            args.push(arguments[i]);
-        }
-
-        chain._prev = wrapperFunction.call(chain, appliedInnerFunction, args);
-        <span class="keyword">return</span> returnValue(chain);
-    }
 }</pre></div></div>
             
         </li>
@@ -373,16 +364,18 @@ we&#39;ll just ignore any we come across. May want to throw an error later.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p>Returns <code>chain.__return__</code> if <code>chain.__break__</code> is set,
-or else returns the chain</p>
+              <p><code>opt</code> options arguments should contain fields
+<code>chain</code>, <code>wrapperFunction</code>, <code>proxiedMethod</code>, <code>stackHeight</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">returnValue</span><span class="params">(chain)</span>{</span>
-    <span class="keyword">if</span>(chain.__break__){
-        <span class="keyword">return</span> chain.__return__;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">createWrappedChainableMethod</span><span class="params">(opt)</span>{</span>
+    <span class="keyword">return</span> <span class="keyword">function</span>(){
+        opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
+        opt.chain.__stack_height__ = opt.stackHeight;
+        
+        <span class="keyword">return</span> returnValue(opt.chain);
     }
-    <span class="keyword">return</span> chain;
 }</pre></div></div>
             
         </li>
@@ -393,6 +386,67 @@ or else returns the chain</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Returns <code>chain.__return__</code> if <code>chain.__break__</code> is set,
+or else returns the chain</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">returnValue</span><span class="params">(chain)</span>{</span>
+    <span class="keyword">var</span> nextLink = getNextLink(chain);
+    <span class="keyword">if</span>(nextLink){
+        chain._nextLink = <span class="literal">null</span>;
+        <span class="keyword">return</span> nextLink;
+    }
+    
+    <span class="keyword">if</span>(chain.__break__){
+        <span class="keyword">return</span> chain.__return__;
+    }
+    <span class="keyword">return</span> chain;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">getNextLink</span><span class="params">(chain)</span>{</span>
+    <span class="keyword">if</span>(chain.__stack_height__ !== <span class="number">0</span>){
+        <span class="keyword">return</span> <span class="literal">undefined</span>;
+    }
+    <span class="keyword">if</span>(!chain._nextLink){
+        <span class="keyword">return</span> <span class="literal">undefined</span>;
+    }
+    <span class="keyword">if</span>(!(<span class="keyword">typeof</span> chain._nextLink === <span class="string">'string'</span>)){
+        <span class="keyword">throw</span> <span class="string">"_nextLink must be a string"</span>
+    }
+    
+    <span class="keyword">var</span> trail = chain._nextLink.split(<span class="string">'.'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Walk the trail from the chain root</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> nextLink = chain;
+    trail.forEach(<span class="keyword">function</span>(node){
+        nextLink = nextLink[node];
+    });
+    
+    <span class="keyword">return</span> nextLink;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>&quot;Captures&quot; an array. (i.e. makes a new array with the same references
  to avoid having the contents of a closed-over array changed externally)</p>
