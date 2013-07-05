@@ -122,51 +122,109 @@ fromSpec.union = function union(){
     }
 };
 
+// **join** performs a join of current `_subject` and `right` param.
+// Join may be inner (the default), left, or right (see below). Note:
+// you must call [on](#on) with some key to perform the join.
+fromSpec.join = function join(right){
+    this._data.left = this._subject;
+    this._data.right = right;
+    
+    if(!this._data.joinType){
+        // Default to inner join (just as with SQL)
+        this._data.joinType = 'inner';
+    }
+    
+    // Only want to expose children of join as the next possible
+    // methods in the chain. (Every 'join' must be followed by an 'on')
+    this._nextLink = "join";
+}
+
+// Join Wrappers
+// -------------
+
+// **left** is a wrapper for join that sets up a `joinType` variable.
+// `joinType` tells the `on` method how to join two collections. In
+//  this case, we select a left join.  
+// Ex.
+// <pre>
+// from(array1).left.join(array2).on('id').take.all();
+// from(array1).where(someCondIsTrue).left.join(array2).on('id').take(3);
+// </pre>
 fromSpec.left = {
     _wrapper: function(called, args){
         this._data.joinType = 'left';
         called.apply(null, args);
     },
-    join: join
+    join: fromSpec.join
 };
 
+// **right** is a wrapper for join that sets up a `joinType` variable.
+// `joinType` tells the `on` method how to join two collections. In
+//  this case, we select a right join.  
+// Ex.
+// <pre>
+// from(array1).right.join(array2).on('id').take.all();
+// from(array1).where(someCondIsTrue).right.join(array2).on('id').take(3);
+// </pre>
 fromSpec.right = {
     _wrapper: function(called, args){
         this._data.joinType = 'right';
         called.apply(null, args);
     },
-    join: join
+    join: fromSpec.join
 };
 
-function join(right){
-    this._data.left = this._subject;
-    this._data.right = right;
-    
-    // Could have been called as `right.join`, but as long
-    // as the next link is the join node we're golden.
-    this._nextLink = "left.join";
+// **inner** is a wrapper for join that sets up a `joinType` variable.
+// `joinType` tells the `on` method how to join two collections. In
+//  this case, we select a inner join. (Note: inner join is the default,
+//  so `from(array1).inner.join(array2).on('id')` is equivalent to
+//  `from(array1).join(array2).on('id')`  
+// Ex.
+// <pre>
+// from(array1).left.join(array2).on('id').take.all();
+// from(array1).where(someCondIsTrue).left.join(array2).on('id').take(3);
+// </pre>
+fromSpec.inner = {
+    _wrapper: function(called, args){
+        this._data.joinType = 'inner';
+        called.apply(null, args);
+    },
+    join: fromSpec.join
 }
 
-join.on = function on(key, isStrict){
+
+// **on** accepts a `key` to join elements on, and an optional `isStrict` flag.
+// If `isStrict` is false, the default, then comparisons are made with `==`. Otherwise,
+// comparisons are with `===`. The result of on is a collection of objects with
+// `left` and `right` fields, containing the elements from the "left" and "right"
+// collections that were matched on their `key` fields. Joins may be left, right, or inner.
+// Ex.
+// <pre>
+// from(array1).join(array2).on('id').take.all();
+// from(array1).left.join(array2).on('val', true).take.first();
+// </pre>
+fromSpec.join.on = function on(key, isStrict){
     var outter,
         outterPrefix,
         inner,
         innerPrefix,
         result = [],
-        resultItem = {};
+        resultItem = {}
+        chain = this;
 
-    if(this._data.joinType === 'left'){
-        outter = this._data.left;
+    if(chain._data.joinType === 'left'
+        || chain._data.joinType === 'inner'){
+        outter = chain._data.left;
         outterPrefix = 'left';
-        inner = this._data.right;
+        inner = chain._data.right;
         innerPrefix = 'right'
     }
-    else if(this._data.joinType === 'right'){
-        outter = this._data.right;
+    else if(chain._data.joinType === 'right'){
+        outter = chain._data.right;
         outterPrefix = 'right';
-        inner = this._data.left;
+        inner = chain._data.left;
         innerPrefix = 'left'
-    } else{
+    }  else {
         throw 'invalid join type';
     }
 
@@ -194,7 +252,7 @@ join.on = function on(key, isStrict){
             }
         })
         
-        if(!matched){
+        if(!matched && !(chain._data.joinType === 'inner')){
             resultItem = {};
             resultItem[outterPrefix] = {};
             resultItem[innerPrefix] = null;
