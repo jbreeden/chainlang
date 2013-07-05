@@ -80,7 +80,7 @@ from(array).take(count);
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take = <span class="keyword">function</span>(count){
+            <div class="content"><div class='highlight'><pre>fromSpec.take = <span class="function"><span class="keyword">function</span> <span class="title">take</span><span class="params">(count)</span>{</span>
     <span class="keyword">var</span> result = [];
     <span class="comment">/* this._subject is initialized with the argument to from(...) */</span>
     <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._subject.length &amp;&amp; i &lt; count; ++i){
@@ -107,7 +107,7 @@ from(array).take.all();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take.all = <span class="keyword">function</span>(){
+            <div class="content"><div class='highlight'><pre>fromSpec.take.all = <span class="function"><span class="keyword">function</span> <span class="title">all</span><span class="params">()</span>{</span>
     <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject);
 }</pre></div></div>
             
@@ -127,7 +127,7 @@ from(array).take.first();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take.first = <span class="keyword">function</span>(){
+            <div class="content"><div class='highlight'><pre>fromSpec.take.first = <span class="function"><span class="keyword">function</span> <span class="title">first</span><span class="params">()</span>{</span>
     <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
         <span class="keyword">this</span>._<span class="keyword">return</span>();
     }
@@ -150,7 +150,7 @@ from(array).take.last();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take.last = <span class="keyword">function</span>(){
+            <div class="content"><div class='highlight'><pre>fromSpec.take.last = <span class="function"><span class="keyword">function</span> <span class="title">last</span><span class="params">()</span>{</span>
     <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
         <span class="keyword">this</span>._<span class="keyword">return</span>();
     }
@@ -174,7 +174,7 @@ from(array).where(cond).take.all();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.where = <span class="keyword">function</span>(cond){
+            <div class="content"><div class='highlight'><pre>fromSpec.where = <span class="function"><span class="keyword">function</span> <span class="title">where</span><span class="params">(cond)</span>{</span>
     <span class="keyword">this</span>._subject = <span class="keyword">this</span>._subject.filter(cond);
 };</pre></div></div>
             
@@ -206,7 +206,7 @@ from(array)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.select = <span class="keyword">function</span>(projector){
+            <div class="content"><div class='highlight'><pre>fromSpec.select = <span class="function"><span class="keyword">function</span> <span class="title">select</span><span class="params">(projector)</span>{</span>
     <span class="keyword">if</span>(<span class="keyword">typeof</span> projector !== <span class="string">"function"</span>){
         projector = makeProjectorForKeys.apply(<span class="literal">null</span>, arguments);
     }
@@ -222,7 +222,6 @@ from(array)
     <span class="keyword">var</span> args = arguments;
     
     <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">keysProjector</span><span class="params">(el)</span>{</span>
-        debugger;
         <span class="keyword">var</span> projection = {};
         <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; args.length; ++i){
             projection[args[i]] = el[args[i]];
@@ -253,13 +252,119 @@ from(array1)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.union = <span class="keyword">function</span>(){
+            <div class="content"><div class='highlight'><pre>fromSpec.union = <span class="function"><span class="keyword">function</span> <span class="title">union</span><span class="params">()</span>{</span>
     <span class="keyword">for</span>(<span class="keyword">var</span> arg = <span class="number">0</span>; arg &lt; arguments.length; ++arg){
         <span class="keyword">for</span>(<span class="keyword">var</span> el = <span class="number">0</span>; el &lt; arguments[arg].length; ++el){
             <span class="keyword">this</span>._subject.push(arguments[arg][el]);
         }
     }
 };
+
+fromSpec.left = {
+    _wrapper: <span class="keyword">function</span>(called, args){
+        <span class="keyword">this</span>._data.joinType = <span class="string">'left'</span>;
+        called.apply(<span class="literal">null</span>, args);
+    },
+    join: join
+};
+
+fromSpec.right = {
+    _wrapper: <span class="keyword">function</span>(called, args){
+        <span class="keyword">this</span>._data.joinType = <span class="string">'right'</span>;
+        called.apply(<span class="literal">null</span>, args);
+    },
+    join: join
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">join</span><span class="params">(right)</span>{</span>
+    <span class="keyword">this</span>._data.left = <span class="keyword">this</span>._subject;
+    <span class="keyword">this</span>._data.right = right;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Could have been called as <code>right.join</code>, but as long
+as the next link is the join node we&#39;re golden.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._nextLink = <span class="string">"left.join"</span>;
+}
+
+join.on = <span class="function"><span class="keyword">function</span> <span class="title">on</span><span class="params">(key, isStrict)</span>{</span>
+    <span class="keyword">var</span> outter,
+        outterPrefix,
+        inner,
+        innerPrefix,
+        result = [],
+        resultItem = {};
+
+    <span class="keyword">if</span>(<span class="keyword">this</span>._data.joinType === <span class="string">'left'</span>){
+        outter = <span class="keyword">this</span>._data.left;
+        outterPrefix = <span class="string">'left'</span>;
+        inner = <span class="keyword">this</span>._data.right;
+        innerPrefix = <span class="string">'right'</span>
+    }
+    <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>._data.joinType === <span class="string">'right'</span>){
+        outter = <span class="keyword">this</span>._data.right;
+        outterPrefix = <span class="string">'right'</span>;
+        inner = <span class="keyword">this</span>._data.left;
+        innerPrefix = <span class="string">'left'</span>
+    } <span class="keyword">else</span>{
+        <span class="keyword">throw</span> <span class="string">'invalid join type'</span>;
+    }
+
+    <span class="keyword">var</span> compare = isStrict ? strictCompare : looseCompare;
+    
+    <span class="keyword">var</span> result = [];
+    outter.forEach(<span class="keyword">function</span>(outterEl){
+        <span class="keyword">var</span> matched = <span class="literal">false</span>;
+        
+        inner.forEach(<span class="keyword">function</span>(innerEl){
+            <span class="keyword">if</span>(compare(outterEl[key], innerEl[key])){
+                matched = <span class="literal">true</span>;
+                
+                resultItem = {};
+                resultItem[innerPrefix] = {};
+                resultItem[outterPrefix] = {};
+                Object.keys(innerEl).forEach(<span class="keyword">function</span>(innerKey){
+                    resultItem[innerPrefix][innerKey] = innerEl[innerKey];
+                });
+                Object.keys(outterEl).forEach(<span class="keyword">function</span>(outterKey){
+                    resultItem[outterPrefix][outterKey] = outterEl[outterKey];
+                });
+                
+                result.push(resultItem);
+            }
+        })
+        
+        <span class="keyword">if</span>(!matched){
+            resultItem = {};
+            resultItem[outterPrefix] = {};
+            resultItem[innerPrefix] = <span class="literal">null</span>;
+            Object.keys(outterEl).forEach(<span class="keyword">function</span>(outterKey){
+                resultItem[outterPrefix][outterKey] = outterEl[outterKey];
+            });
+            result.push(resultItem);
+        }
+    });
+    
+    <span class="keyword">this</span>._subject = result;
+};
+
+<span class="function"><span class="keyword">function</span> <span class="title">strictCompare</span><span class="params">(first, second)</span>{</span>
+    <span class="keyword">return</span> first === second;
+}
+
+<span class="function"><span class="keyword">function</span> <span class="title">looseCompare</span><span class="params">(first, second)</span>{</span>
+    <span class="keyword">return</span> first == second;
+}
 
 module.exports = chainlang.create(fromSpec);</pre></div></div>
             
