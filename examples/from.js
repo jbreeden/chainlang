@@ -14,7 +14,7 @@ var fromSpec = {};
 // <pre>
 // from(array).take(count);
 //</pre>
-fromSpec.take = function(count){
+fromSpec.take = function take(count){
     var result = [];
     /* this._subject is initialized with the argument to from(...) */
     for(i = 0; i < this._subject.length && i < count; ++i){
@@ -29,7 +29,7 @@ fromSpec.take = function(count){
 // <pre>
 // from(array).take.all();
 // </pre>
-fromSpec.take.all = function(){
+fromSpec.take.all = function all(){
     this._return(this._subject);
 }
 
@@ -37,7 +37,7 @@ fromSpec.take.all = function(){
 // <pre>
 // from(array).take.first();
 // </pre>
-fromSpec.take.first = function(){
+fromSpec.take.first = function first(){
     if(!(this._subject.length >= 1)){
         this._return();
     }
@@ -48,7 +48,7 @@ fromSpec.take.first = function(){
 // <pre>
 // from(array).take.last();
 // </pre>
-fromSpec.take.last = function(){
+fromSpec.take.last = function last(){
     if(!(this._subject.length >= 1)){
         this._return();
     }
@@ -60,7 +60,7 @@ fromSpec.take.last = function(){
 // <pre>
 // from(array).where(cond).take.all();
 // </pre>
-fromSpec.where = function(cond){
+fromSpec.where = function where(cond){
     this._subject = this._subject.filter(cond);
 };
 
@@ -80,7 +80,7 @@ fromSpec.where = function(cond){
 //     .where(function(el){ el != null; })
 //     .take.all();
 // </pre>
-fromSpec.select = function(projector){
+fromSpec.select = function select(projector){
     if(typeof projector !== "function"){
         projector = makeProjectorForKeys.apply(null, arguments);
     }
@@ -96,7 +96,6 @@ function makeProjectorForKeys(){
     var args = arguments;
     
     return function keysProjector(el){
-        debugger;
         var projection = {};
         for(var i = 0; i < args.length; ++i){
             projection[args[i]] = el[args[i]];
@@ -115,7 +114,7 @@ function makeProjectorForKeys(){
 //     .where(function(el){ return el.id == 2; })
 //     .take.all();
 // </pre>
-fromSpec.union = function(){
+fromSpec.union = function union(){
     for(var arg = 0; arg < arguments.length; ++arg){
         for(var el = 0; el < arguments[arg].length; ++el){
             this._subject.push(arguments[arg][el]);
@@ -126,7 +125,7 @@ fromSpec.union = function(){
 fromSpec.left = {
     _wrapper: function(called, args){
         this._data.joinType = 'left';
-        return called(args);
+        called.apply(null, args);
     },
     join: join
 };
@@ -134,7 +133,7 @@ fromSpec.left = {
 fromSpec.right = {
     _wrapper: function(called, args){
         this._data.joinType = 'right';
-        return called(args);
+        called.apply(null, args);
     },
     join: join
 };
@@ -142,11 +141,13 @@ fromSpec.right = {
 function join(right){
     this._data.left = this._subject;
     this._data.right = right;
-
-    this._persist = true;
+    
+    // Could have been called as `right.join`, but as long
+    // as the next link is the join node we're golden.
+    this._nextLink = "left.join";
 }
 
-join.on = function(key, isStrict){
+join.on = function on(key, isStrict){
     var outter,
         outterPrefix,
         inner,
@@ -170,7 +171,8 @@ join.on = function(key, isStrict){
     }
 
     var compare = isStrict ? strictCompare : looseCompare;
-
+    
+    var result = [];
     outter.forEach(function(outterEl){
         var matched = false;
         
@@ -187,6 +189,8 @@ join.on = function(key, isStrict){
                 Object.keys(outterEl).forEach(function(outterKey){
                     resultItem[outterPrefix][outterKey] = outterEl[outterKey];
                 });
+                
+                result.push(resultItem);
             }
         })
         
@@ -197,9 +201,11 @@ join.on = function(key, isStrict){
             Object.keys(outterEl).forEach(function(outterKey){
                 resultItem[outterPrefix][outterKey] = outterEl[outterKey];
             });
+            result.push(resultItem);
         }
     });
-
+    
+    this._subject = result;
 };
 
 function strictCompare(first, second){

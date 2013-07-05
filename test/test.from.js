@@ -96,3 +96,36 @@ describe('union', function(){
         ).to.eql([1, 2, 3, 4, 5, 6]);
     });
 });
+
+describe('left.join(right).on(key)', function(){
+    var left = [
+        { id: 1, name: 'left'},
+        { id: 2, name: 'left'}
+    ];
+
+    var right = [
+        { id: 1, name: 'right'},
+        { id: 3, name: 'right'}
+    ];
+
+    it('makes a left outter join of _subject with "right" where _subject[key] and right[key] match', function(){
+        var result = 
+            from(left)
+            .left.join(right)
+            .on('id')
+            .take.all();
+        
+        expect(result.length).to.be(2);
+        result.forEach(function(el){
+            if(el.left.id == 1){
+                expect(el.right.id).to.be(1);
+            } else if (el.left.id == 2){
+                expect(el.right).to.eql(null);
+            }
+            else{
+                expect().fail("Join result should only have elements with left.id 1|2");
+            }
+        });
+    });
+});
+

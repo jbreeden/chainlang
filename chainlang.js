@@ -63,9 +63,11 @@ chainlang.create = function(lang){
         theChain._subject = obj;
         theChain._data = {};
         theChain._prev = null;
+        theChain._nextLink = null;
         theChain.__break__ = false;
         theChain.__return__ = undefined;
-
+        theChain.__stack_height__ = 0;
+        
         return theChain;
     }
 
@@ -149,33 +151,71 @@ function createChainableProxiedMethod(chain, fn, wrappers){
         wrappers = captureArray(wrappers);
 
     proxiedMethod = function(){
+        chain.__stack_height__ = wrappers.length;
         chain._prev = fn.apply(chain, arguments);
         return returnValue(chain);
     }
 
     if(wrappers.length > 0){
         for(i = wrappers.length - 1; i >= 0; i -= 1){
-            proxiedMethod = createWrappedChainableMethod(chain, wrappers[i], proxiedMethod);
+            proxiedMethod = createWrappedChainableMethod({
+                    chain: chain,
+                    wrapperFunction: wrappers[i],
+                    proxiedMethod: proxiedMethod,
+                    stackHeight: i
+                });
         }
     }
 
     return proxiedMethod;
 }
 
-function createWrappedChainableMethod(chain, wrapperFunction, proxiedMethod){
+// `opt` options arguments should contain fields
+// `chain`, `wrapperFunction`, `proxiedMethod`, `stackHeight`
+function createWrappedChainableMethod(opt){
     return function(){
-        chain._prev = wrapperFunction.call(chain, proxiedMethod, arguments);
-        return returnValue(chain);
+        opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
+        opt.chain.__stack_height__ = opt.stackHeight;
+        
+        return returnValue(opt.chain);
     }
 }
 
 // Returns `chain.__return__` if `chain.__break__` is set,
 // or else returns the chain
 function returnValue(chain){
+    var nextLink = getNextLink(chain);
+    if(nextLink){
+        chain._nextLink = null;
+        return nextLink;
+    }
+    
     if(chain.__break__){
         return chain.__return__;
     }
     return chain;
+}
+
+function getNextLink(chain){
+    if(chain.__stack_height__ !== 0){
+        return undefined;
+    }
+    if(!chain._nextLink){
+        return undefined;
+    }
+    if(!(typeof chain._nextLink === 'string')){
+        throw "_nextLink must be a string"
+    }
+    
+    var trail = chain._nextLink.split('.');
+    
+    // Walk the trail from the chain root
+    var nextLink = chain;
+    trail.forEach(function(node){
+        nextLink = nextLink[node];
+    });
+    
+    return nextLink;
 }
 
 // "Captures" an array. (i.e. makes a new array with the same references
