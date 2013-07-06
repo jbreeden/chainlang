@@ -59,7 +59,7 @@ That's the basic idea.
 
 # Features
 
-Chainlang provides a small but powerful set of features to control the semantics of your generated API. Some of these features, like the `_return` method discussed in the introduction, are fields or methods accessible via `this` within the methods of your language specification object. Others, like `_wrapper`s, are special nodes that can be placed within your specification. (For an interesting use of `_wrapper` nodes, see the section on "Join Wrappers" in the [full fromjs example](http://jbreeden.github.io/chainlang/fromjs/from.html))
+Chainlang provides a small but powerful set of features to control the semantics of your generated API. Some of these features, like the `_breaksChain` method discussed in the introduction, are fields or methods accessible via `this` within the methods of your language specification object. Others, like `_wrapper`s, are special nodes that can be placed within your specification. (For an interesting use of `_wrapper` nodes, see the section on "Join Wrappers" in the [full fromjs example](http://jbreeden.github.io/chainlang/fromjs/from.html))
 
 ### Basic
 
