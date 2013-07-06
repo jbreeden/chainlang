@@ -130,13 +130,12 @@ interleaved with other chain expressions of the same language.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p><code>_return</code> is used to break the chain and return a value</p>
+              <p><code>_breaksChain</code> is used to break the chain and return a value</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    theChain._<span class="keyword">return</span> = <span class="keyword">function</span>(returnValue){
+            <div class="content"><div class='highlight'><pre>    theChain._breaksChain = <span class="keyword">function</span>(returnValue){
         theChain.__break__ = <span class="literal">true</span>;
-        theChain.__return__ = returnValue;
     }</pre></div></div>
             
         </li>
@@ -191,7 +190,6 @@ of the new <code>chainlang</code> type.
         theChain._prev = <span class="literal">null</span>;
         theChain._nextLink = <span class="literal">null</span>;
         theChain.__break__ = <span class="literal">false</span>;
-        theChain.__return__ = <span class="literal">undefined</span>;
         theChain.__stack_height__ = <span class="number">0</span>;
         
         <span class="keyword">return</span> theChain;
@@ -393,22 +391,22 @@ or else returns the chain</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">returnValue</span><span class="params">(chain)</span>{</span>
-    <span class="keyword">var</span> nextLink = getNextLink(chain);
-    <span class="keyword">if</span>(nextLink){
+    <span class="keyword">if</span>(chain.__stack_height__ === <span class="number">0</span>){
+        <span class="keyword">var</span> nextLink = getNextLink(chain);
         chain._nextLink = <span class="literal">null</span>;
-        <span class="keyword">return</span> nextLink;
+        
+        <span class="keyword">if</span>(chain.__break__){
+            <span class="keyword">return</span> chain._prev;
+        }
+        <span class="keyword">if</span>(nextLink){
+            <span class="keyword">return</span> nextLink;
+        }
     }
     
-    <span class="keyword">if</span>(chain.__break__){
-        <span class="keyword">return</span> chain.__return__;
-    }
     <span class="keyword">return</span> chain;
 }
 
 <span class="function"><span class="keyword">function</span> <span class="title">getNextLink</span><span class="params">(chain)</span>{</span>
-    <span class="keyword">if</span>(chain.__stack_height__ !== <span class="number">0</span>){
-        <span class="keyword">return</span> <span class="literal">undefined</span>;
-    }
     <span class="keyword">if</span>(!chain._nextLink){
         <span class="keyword">return</span> <span class="literal">undefined</span>;
     }
