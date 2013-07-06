@@ -15,7 +15,7 @@ var fromSpec = {};
 // from(array).take(count);
 //</pre>
 fromSpec.take = function take(count){
-    /* This method breaks the chain and returns its own return value */
+    /* `take` method breaks the chain and returns its own return value */
     this._breaksChain();
 
     var result = [];
