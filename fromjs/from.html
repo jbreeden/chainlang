@@ -81,14 +81,16 @@ from(array).take(count);
             </div>
             
             <div class="content"><div class='highlight'><pre>fromSpec.take = <span class="function"><span class="keyword">function</span> <span class="title">take</span><span class="params">(count)</span>{</span>
+    <span class="comment">/* This method breaks the chain and returns its own return value */</span>
+    <span class="keyword">this</span>._breaksChain();
+
     <span class="keyword">var</span> result = [];
     <span class="comment">/* this._subject is initialized with the argument to from(...) */</span>
     <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._subject.length &amp;&amp; i &lt; count; ++i){
         result.push(<span class="keyword">this</span>._subject[i]);
     }
     
-    <span class="comment">/* `this._return` is used to break the chain and return a value */</span>
-    <span class="keyword">this</span>._<span class="keyword">return</span>(result);
+    <span class="keyword">return</span> result;
 };</pre></div></div>
             
         </li>
@@ -108,7 +110,8 @@ from(array).take.all();
             </div>
             
             <div class="content"><div class='highlight'><pre>fromSpec.take.all = <span class="function"><span class="keyword">function</span> <span class="title">all</span><span class="params">()</span>{</span>
-    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject);
+    <span class="keyword">this</span>._breaksChain();
+    <span class="keyword">return</span> <span class="keyword">this</span>._subject;
 }</pre></div></div>
             
         </li>
@@ -128,10 +131,12 @@ from(array).take.first();
             </div>
             
             <div class="content"><div class='highlight'><pre>fromSpec.take.first = <span class="function"><span class="keyword">function</span> <span class="title">first</span><span class="params">()</span>{</span>
+    <span class="keyword">this</span>._breaksChain();
+    
     <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
-        <span class="keyword">this</span>._<span class="keyword">return</span>();
+        <span class="keyword">return</span>;
     }
-    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject[<span class="number">0</span>]);
+    <span class="keyword">return</span> <span class="keyword">this</span>._subject[<span class="number">0</span>];
 }</pre></div></div>
             
         </li>
@@ -151,10 +156,12 @@ from(array).take.last();
             </div>
             
             <div class="content"><div class='highlight'><pre>fromSpec.take.last = <span class="function"><span class="keyword">function</span> <span class="title">last</span><span class="params">()</span>{</span>
+    <span class="keyword">this</span>._breaksChain();
+    
     <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
-        <span class="keyword">this</span>._<span class="keyword">return</span>();
+        <span class="keyword">return</span>;
     }
-    <span class="keyword">this</span>._<span class="keyword">return</span>(<span class="keyword">this</span>._subject[<span class="keyword">this</span>._subject.length - <span class="number">1</span>]);
+    <span class="keyword">return</span> <span class="keyword">this</span>._subject[<span class="keyword">this</span>._subject.length - <span class="number">1</span>];
 }</pre></div></div>
             
         </li>
