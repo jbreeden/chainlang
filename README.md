@@ -63,7 +63,7 @@ Chainlang provides a small but powerful set of features to control the semantics
 
 ### Basic
 
-TODO (`_subject`, `_data`, `_prev`, `_breaksChain`)
+TODO (`_subject`, `_data`, `_prev`, `_breaksChain`, using `_breaksChain` conditionally to short-circuit)
 
 ### Advanced
 
