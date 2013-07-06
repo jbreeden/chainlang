@@ -1,4 +1,4 @@
-var exec = require('child_process').exec;
+var childProc = require('child_process');
 var fs = require('fs');
 var handlebars = require('handlebars');
 
@@ -6,15 +6,27 @@ namespace('docs', function(){
     desc('Makes sure folder ../chainlang-gh-pages exists. (This is where we will copy documentation)');
     directory('chainlang-gh-pages');
 
+    desc('Makes sure folder ../chainlang-gh-pages/spec exists. (This location will hold mocha doc output from tests)');
     directory('chainlang-gh-pages/spec');
 
+    desc('Makes sure folder ../chainlang-gh-pages/source exists. (This location will hold the docco output for chainlang)');
+    directory('chainlang-gh-pages/source');
+
+    desc('Makes all the documentation');
+    task('all', ['chainlang-docco', 'chainlang-spec']);
+
+    desc('Generates documentation for chainlang.js with docco');
+    task('chainlang-docco', ['chainlang-gh-pages', 'chainlang-gh-pages/source'], function(){
+        childProc.exec('docco -o ./chainlang-gh-pages/source/ ./chainlang.js');
+    });
+
     desc('Makes gets the doc output from mocha for chainlang.js and adds some style');
-    task('spec', ['chainlang-gh-pages', 'chainlang-gh-pages/spec'], function(){
+    task('chainlang-spec', ['chainlang-gh-pages', 'chainlang-gh-pages/spec'], function(){
         
         var specHtml, template;
 
         // Get the mocha output
-        exec('mocha --reporter doc ./test/test.chainlang.js', function(error, stdout, stderr){
+        childProc.exec('mocha --reporter doc ./test/test.chainlang.js', function(err, stdout, stderr){
             specHtml = stdout;
             compileHandlebarsTemplate();
         });

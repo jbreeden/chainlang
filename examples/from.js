@@ -40,6 +40,7 @@ fromSpec.take.all = function all(){
 fromSpec.take.first = function first(){
     if(!(this._subject.length >= 1)){
         this._return();
+        return;
     }
     this._return(this._subject[0]);
 }
