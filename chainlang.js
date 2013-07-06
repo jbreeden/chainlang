@@ -43,10 +43,9 @@ chainlang.create = function(lang){
     // interleaved with other chain expressions of the same language.
     var theChain = createChainableProxy(lang);
 
-    // `_return` is used to break the chain and return a value
-    theChain._return = function(returnValue){
+    // `_breaksChain` is used to break the chain and return a value
+    theChain._breaksChain = function(returnValue){
         theChain.__break__ = true;
-        theChain.__return__ = returnValue;
     }
 
     // ### chain expression constructor
@@ -65,7 +64,6 @@ chainlang.create = function(lang){
         theChain._prev = null;
         theChain._nextLink = null;
         theChain.__break__ = false;
-        theChain.__return__ = undefined;
         theChain.__stack_height__ = 0;
         
         return theChain;
@@ -184,22 +182,22 @@ function createWrappedChainableMethod(opt){
 // Returns `chain.__return__` if `chain.__break__` is set,
 // or else returns the chain
 function returnValue(chain){
-    var nextLink = getNextLink(chain);
-    if(nextLink){
+    if(chain.__stack_height__ === 0){
+        var nextLink = getNextLink(chain);
         chain._nextLink = null;
-        return nextLink;
+        
+        if(chain.__break__){
+            return chain._prev;
+        }
+        if(nextLink){
+            return nextLink;
+        }
     }
     
-    if(chain.__break__){
-        return chain.__return__;
-    }
     return chain;
 }
 
 function getNextLink(chain){
-    if(chain.__stack_height__ !== 0){
-        return undefined;
-    }
     if(!chain._nextLink){
         return undefined;
     }

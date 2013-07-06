@@ -9,13 +9,13 @@ describe('chainlang.create(lang)', function(){
         expect(callCreateWithTwoArgs).to.throwException();
     });
 
-	it('returns a chain constructor for the new language', function(){
+	it('returns a chain function for the new language, used to start chained expressions', function(){
         var newLang = chainlang.create({});
         expect(newLang).to.be.a('function');
     });
 });
 
-describe('A chain constructor returned from chainlang.create', function(){
+describe('A chain function returned from chainlang.create', function(){
     it('Accepts an optional argument, and throws if more than one argument is provided', function(){
         var chain = chainlang.create({});
 
@@ -30,7 +30,7 @@ describe('A chain constructor returned from chainlang.create', function(){
         ).to.throwException();
     });
 
-    it('constructs a chain object whose prototype structure mirrors the language passed to chainlang.create', function(){
+    it('Starts a chain of methods bound to a chain object with proxied version of all the language spec fields', function(){
         var stubLang = {
             topLevelFn: function(){},
             topLevelProp: "someValue",
@@ -51,16 +51,61 @@ describe('A chain constructor returned from chainlang.create', function(){
 });
 
 describe('A chain object', function(){
+    it('Implicitly returns itself from all decendant methods', function(){
+        var chain = chainlang.create({
+            returnsScalar: function(){
+                return 1;
+            },
+            levelTwo: {
+                returnsScalar: function(){
+                    return 2;
+                }
+            }
+        });
+        
+        expect(
+            chain().returnsScalar()
+        ).to.eql(
+            chain()
+        );
+        
+        expect(
+            chain().levelTwo.returnsScalar()
+        ).to.eql(
+            chain()
+        );
+    });
+    
+    it('contains a "_breaksChain" method that prevents the implicit return of the chain object', function(){
+        var chain = chainlang.create({
+            iBreakTheChain: function(){
+                this._breaksChain();
+                return 'some scalar';
+            }
+        });
+        
+        expect(
+            chain().iBreakTheChain()
+        ).to.eql("some scalar")
+    });
+
     it('contains a "_prev" property that always contains the return value of the last function in the chain', function(){
         var chain = chainlang.create(
             {
-                returnsOne: function(){return 1;},
-                returnsTwo: function(){return 2;}
+                returnsOne: function(){ return 1; },
+                returnsTwo: function(){ return 2; },
+                breaksAndReturnsPrev: function(){
+                    this._breaksChain();
+                    return this._prev;
+                }
             });
 
-        link = chain().returnsOne();
-        expect(link._prev).to.be(1);
-        expect(link.returnsTwo()._prev).to.be(2);
+        expect(
+            chain().returnsOne().breaksAndReturnsPrev()
+        ).to.be(1);
+        expect(
+            chain().returnsTwo().breaksAndReturnsPrev()
+        ).to.be(2);
     });
 
     it('contains a "_data" property which can be used to pass data through the chain and is initially empty', function(){
@@ -76,28 +121,19 @@ describe('A chain object', function(){
         expect(hasOwnKey).to.be(false);
     });
 
-    it('contains a "_subject" property, which references the optional parameter to the chain constructor if supplied', function(){
-        var chain = chainlang.create({});
+    it('contains a "_subject" property, which references the optional parameter to the chain function', function(){
+        var chain = chainlang.create({
+            getSubject: function(){
+                this._breaksChain();
+                return this._subject;
+            }
+        });
+        
         var actualSubject = {iAm: "theSubject"};
 
         expect(
-            chain(actualSubject)._subject
+            chain(actualSubject).getSubject()
         ).to.be.eql(actualSubject);
-    });
-
-    it('contains a "_return" method that breaks the chain and returns any value passed into it', function(){
-        var chain = chainlang.create({
-            someFn: function(){
-                return "I came from someFn";
-            },
-            iBreakTheChain: function(){
-                this._return(this._prev);
-            }
-        });
-
-        var result = chain().someFn().iBreakTheChain();
-
-        expect(result).to.be("I came from someFn")
     });
 
     it('allows chaining of methods arbitrarily nested within properties of the language', function(){
@@ -136,7 +172,6 @@ describe('A chain object', function(){
     });
 
     it('is bound to "this" for every method call in the chain, even for methods of child objects', function(){
-        debugger;
         var spy = sinon.spy();
 
         var chain = chainlang.create({
@@ -145,11 +180,14 @@ describe('A chain object', function(){
                 secondLevelFn: spy
             }
         });
+        
+        var theChain = chain();
+        
+        // Running some methods to spy on their `this` value
+        chain().topLevelFn().secondLevel.secondLevelFn();
 
-        var link = chain().topLevelFn().secondLevel.secondLevelFn();
-
-        expect(spy.thisValues[0]).to.be.eql(link);
-        expect(spy.thisValues[1]).to.be.eql(link);
+        expect(spy.thisValues[0]).to.be.eql(theChain);
+        expect(spy.thisValues[1]).to.be.eql(theChain);
     });
 
 });
@@ -184,9 +222,10 @@ describe('Any node in the chain object graph', function(){
         var spy = sinon.spy();
         
         var chainSpec = {};
-        chainSpec.prop = spy;
+        chainSpec.prop = spy; /* spy is a function, so prop is a method */
         chainSpec.prop.methodsStillAvailable = function(){
-            this._return(true);
+            this._breaksChain();
+            return true;
         }
         
         var chain = chainlang.create(chainSpec);
@@ -200,12 +239,14 @@ describe('Any node in the chain object graph', function(){
     it('may include a "_wrapper" method, used to wrap descendant functions to process args/output', function(){
         var lang = {
             returnsArg: function(arg){
-                this._return(arg);
+                this._breaksChain();
+                return arg;
             }
         };
         lang.negator = {
             _wrapper: function(nestedfn, args){
-                this._return(!nestedfn(args[0]));
+                nestedfn(args[0]);
+                return !this._prev;
             },
             returnsArg: lang.returnsArg
         };
@@ -219,30 +260,35 @@ describe('Any node in the chain object graph', function(){
 
 describe('wrappers', function(){
     it('may be arbitrarily nested', function(){
-        var lang = {
-            returnsArg: function(arg){
-                this._return(arg);
-            }
-        };
-        lang.negator = {
-            _wrapper: function(nestedfn, args){
-                this._return(!nestedfn(args[0]));
-            },
-            returnsArg: function(arg){
-                return arg;
-            },
-            negator: {
-                _wrapper: function(nestedfn, args){
-                    this._return(!nestedfn(args[0]));
-                },
-                returnsArg: function(arg){
-                    return arg;
+        // Defining a `returnsArg` node (will be used mutiple times in langSpec)
+        var argReturningNode = function(arg){
+            this._breaksChain()
+            return arg;
+        }
+        
+        // Defining a `negator` node factory
+        function createNegator(){
+            return {
+                _wrapper: function(called, args){
+                    called.apply(null, args);
+                    return !this._prev;
                 }
-            }
+            };
         };
+        
+        // Creating language spec object
+        var langSpec = {
+            returnsArg: argReturningNode,
+            negator: createNegator()
+        };
+        langSpec.negator.returnsArg = argReturningNode;
+        
+        // Adding a nested `negator` node
+        langSpec.negator.negator = createNegator();
+        langSpec.negator.negator.returnsArg = argReturningNode;
 
-        var chain = chainlang.create(lang);
-
+        var chain = chainlang.create(langSpec);
+        
         expect(chain().returnsArg(true)).to.be(true);
         expect(chain().negator.returnsArg(true)).to.be(false);
         expect(chain().negator.negator.returnsArg(true)).to.be(true);

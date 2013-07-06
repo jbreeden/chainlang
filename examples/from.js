@@ -15,14 +15,16 @@ var fromSpec = {};
 // from(array).take(count);
 //</pre>
 fromSpec.take = function take(count){
+    /* This method breaks the chain and returns its own return value */
+    this._breaksChain();
+
     var result = [];
     /* this._subject is initialized with the argument to from(...) */
     for(i = 0; i < this._subject.length && i < count; ++i){
         result.push(this._subject[i]);
     }
     
-    /* `this._return` is used to break the chain and return a value */
-    this._return(result);
+    return result;
 };
 
 // **take.all** returns all of the elements of `_subject`
@@ -30,7 +32,8 @@ fromSpec.take = function take(count){
 // from(array).take.all();
 // </pre>
 fromSpec.take.all = function all(){
-    this._return(this._subject);
+    this._breaksChain();
+    return this._subject;
 }
 
 // **take.first** returns the first element of `_subject`
@@ -38,11 +41,12 @@ fromSpec.take.all = function all(){
 // from(array).take.first();
 // </pre>
 fromSpec.take.first = function first(){
+    this._breaksChain();
+    
     if(!(this._subject.length >= 1)){
-        this._return();
         return;
     }
-    this._return(this._subject[0]);
+    return this._subject[0];
 }
 
 // **take.last** returns the last element of `_subject`
@@ -50,10 +54,12 @@ fromSpec.take.first = function first(){
 // from(array).take.last();
 // </pre>
 fromSpec.take.last = function last(){
+    this._breaksChain();
+    
     if(!(this._subject.length >= 1)){
-        this._return();
+        return;
     }
-    this._return(this._subject[this._subject.length - 1]);
+    return this._subject[this._subject.length - 1];
 }
 
 // **where** accepts a function, `cond`, and uses it to
