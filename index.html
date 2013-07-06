@@ -49,7 +49,8 @@
     <span class="p">},</span>
     <span class="nx">take</span><span class="o">:</span> <span class="p">{</span>
         <span class="nx">all</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
-            <span class="k">this</span><span class="p">.</span><span class="nx">_return</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">);</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">_breaksChain</span><span class="p">();</span>
+            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">;</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">};</span>
@@ -74,19 +75,19 @@
 
 <p>Also note that no care was taken to return <code>this</code> from the methods of <code>fromSpec</code> as is typical with chainable methods. In fact, <code>fromSpec.where</code> doesn't return anything, but we're still able to chain together an expression such as <code>from(numbers).where(cond).take.all()</code>. That's because <code>chainlang.create</code> creates a copy of its argument (the language spec) where all methods are proxied. The proxied methods all have their <code>this</code> context permanently bound to a chain object, and they all return the chain object implicitly.</p>
 
-<p>So, what happens if you want to return a value? Just as in <code>fromSpec.take.all</code> above, you call <code>this._return</code> with some argument. This sets a flag on the chain object itself that tells the proxied methods to break the chain and return whatever value you've provided.</p>
+<p>So, what happens if you want to return a value? Just as in <code>fromSpec.take.all</code> above, you call <code>this._breaksChain()</code>. This sets a flag on the chain object itself that tells the proxied methods to return their own return value instead of implicitly returning the chain object.</p>
 
 <p>That's the basic idea.</p>
 
 <h1>
 <a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
 
-<p>Chainlang provides a small but powerful set of features to control the semantics of your generated API. Some of these features, like the <code>_return</code> method discussed in the introduction, are fields or methods accessible via <code>this</code> within the methods of your language specification object. Others, like <code>_wrapper</code>s, are special nodes that can be placed within your specification. (For an interesting use of <code>_wrapper</code> nodes, see the section on "Join Wrappers" in the <a href="http://jbreeden.github.io/chainlang/fromjs/from.html">full fromjs example</a>)</p>
+<p>Chainlang provides a small but powerful set of features to control the semantics of your generated API. Some of these features, like the <code>_breaksChain</code> method discussed in the introduction, are fields or methods accessible via <code>this</code> within the methods of your language specification object. Others, like <code>_wrapper</code>s, are special nodes that can be placed within your specification. (For an interesting use of <code>_wrapper</code> nodes, see the section on "Join Wrappers" in the <a href="http://jbreeden.github.io/chainlang/fromjs/from.html">full fromjs example</a>)</p>
 
 <h3>
 <a name="basic" class="anchor" href="#basic"><span class="octicon octicon-link"></span></a>Basic</h3>
 
-<p>TODO (<code>_subject</code>, <code>_data</code>, <code>_prev</code>, <code>_return</code>)</p>
+<p>TODO (<code>_subject</code>, <code>_data</code>, <code>_prev</code>, <code>_breaksChain</code>)</p>
 
 <h3>
 <a name="advanced" class="anchor" href="#advanced"><span class="octicon octicon-link"></span></a>Advanced</h3>
@@ -101,7 +102,8 @@
 <ul>
 <li><a href="http://jbreeden.github.io/chainlang/fromjs/from.html">Example: Creating a full-feature fromjs library</a></li>
 <li><a href="http://jbreeden.github.io/chainlang/source/chainlang.html">Annotated source of chainlang.js</a></li>
-<li><a href="http://jbreeden.github.io/chainlang/spec/spec.html">Chainlang spec</a></li>
+<li>
+<a href="http://jbreeden.github.io/chainlang/spec/spec.html">Spec</a> (As in, <code>mocha --reporter doc ./test/test.chainlang.js</code>)</li>
 </ul>
       </section>
     </div>
