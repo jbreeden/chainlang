@@ -26,7 +26,8 @@ var fromSpec = {
     },
     take: {
         all: function(){
-            this._return(this._subject);
+            this._breaksChain();
+            return this._subject;
         }
     }
 };
@@ -52,7 +53,7 @@ Granted, this isn't the most feature-filled API ever created ([yet](http://jbree
 
 Also note that no care was taken to return `this` from the methods of `fromSpec` as is typical with chainable methods. In fact, `fromSpec.where` doesn't return anything, but we're still able to chain together an expression such as `from(numbers).where(cond).take.all()`. That's because `chainlang.create` creates a copy of its argument (the language spec) where all methods are proxied. The proxied methods all have their `this` context permanently bound to a chain object, and they all return the chain object implicitly.
 
-So, what happens if you want to return a value? Just as in `fromSpec.take.all` above, you call `this._return` with some argument. This sets a flag on the chain object itself that tells the proxied methods to break the chain and return whatever value you've provided.
+So, what happens if you want to return a value? Just as in `fromSpec.take.all` above, you call `this._breaksChain()`. This sets a flag on the chain object itself that tells the proxied methods to return their own return value instead of implicitly returning the chain object.
 
 That's the basic idea.
 
@@ -62,7 +63,7 @@ Chainlang provides a small but powerful set of features to control the semantics
 
 ### Basic
 
-TODO (`_subject`, `_data`, `_prev`, `_return`)
+TODO (`_subject`, `_data`, `_prev`, `_breaksChain`)
 
 ### Advanced
 
