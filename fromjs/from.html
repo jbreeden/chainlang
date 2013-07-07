@@ -81,7 +81,7 @@ from(array).take(count);
             </div>
             
             <div class="content"><div class='highlight'><pre>fromSpec.take = <span class="function"><span class="keyword">function</span> <span class="title">take</span><span class="params">(count)</span>{</span>
-    <span class="comment">/* This method breaks the chain and returns its own return value */</span>
+    <span class="comment">/* `take` method breaks the chain and returns its own return value */</span>
     <span class="keyword">this</span>._breaksChain();
 
     <span class="keyword">var</span> result = [];
@@ -318,7 +318,7 @@ methods in the chain. (Every &#39;join&#39; must be followed by an &#39;on&#39;)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._nextLink = <span class="string">"join"</span>;
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._linksTo(<span class="string">"join"</span>);
 }</pre></div></div>
             
         </li>

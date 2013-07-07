@@ -136,6 +136,10 @@ interleaved with other chain expressions of the same language.</p>
             
             <div class="content"><div class='highlight'><pre>    theChain._breaksChain = <span class="keyword">function</span>(returnValue){
         theChain.__break__ = <span class="literal">true</span>;
+    }
+    
+    theChain._linksTo = <span class="keyword">function</span>(nextLink){
+        theChain.__nextLink__ = nextLink
     }</pre></div></div>
             
         </li>
@@ -188,9 +192,9 @@ of the new <code>chainlang</code> type.
             <div class="content"><div class='highlight'><pre>        theChain._subject = obj;
         theChain._data = {};
         theChain._prev = <span class="literal">null</span>;
-        theChain._nextLink = <span class="literal">null</span>;
+        theChain.__nextLink__ = <span class="literal">null</span>;
         theChain.__break__ = <span class="literal">false</span>;
-        theChain.__stack_height__ = <span class="number">0</span>;
+        theChain.__stackHeight__ = <span class="number">0</span>;
         
         <span class="keyword">return</span> theChain;
     }</pre></div></div>
@@ -334,7 +338,7 @@ we&#39;ll just ignore any we come across. May want to throw an error later.</p>
         wrappers = captureArray(wrappers);
 
     proxiedMethod = <span class="keyword">function</span>(){
-        chain.__stack_height__ = wrappers.length;
+        chain.__stackHeight__ = wrappers.length;
         chain._prev = fn.apply(chain, arguments);
         <span class="keyword">return</span> returnValue(chain);
     }
@@ -370,7 +374,7 @@ we&#39;ll just ignore any we come across. May want to throw an error later.</p>
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">createWrappedChainableMethod</span><span class="params">(opt)</span>{</span>
     <span class="keyword">return</span> <span class="keyword">function</span>(){
         opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
-        opt.chain.__stack_height__ = opt.stackHeight;
+        opt.chain.__stackHeight__ = opt.stackHeight;
         
         <span class="keyword">return</span> returnValue(opt.chain);
     }
@@ -391,9 +395,9 @@ or else returns the chain</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">returnValue</span><span class="params">(chain)</span>{</span>
-    <span class="keyword">if</span>(chain.__stack_height__ === <span class="number">0</span>){
+    <span class="keyword">if</span>(chain.__stackHeight__ === <span class="number">0</span>){
         <span class="keyword">var</span> nextLink = getNextLink(chain);
-        chain._nextLink = <span class="literal">null</span>;
+        chain.__nextLink__ = <span class="literal">null</span>;
         
         <span class="keyword">if</span>(chain.__break__){
             <span class="keyword">return</span> chain._prev;
@@ -407,14 +411,14 @@ or else returns the chain</p>
 }
 
 <span class="function"><span class="keyword">function</span> <span class="title">getNextLink</span><span class="params">(chain)</span>{</span>
-    <span class="keyword">if</span>(!chain._nextLink){
+    <span class="keyword">if</span>(!chain.__nextLink__){
         <span class="keyword">return</span> <span class="literal">undefined</span>;
     }
-    <span class="keyword">if</span>(!(<span class="keyword">typeof</span> chain._nextLink === <span class="string">'string'</span>)){
-        <span class="keyword">throw</span> <span class="string">"_nextLink must be a string"</span>
+    <span class="keyword">if</span>(!(<span class="keyword">typeof</span> chain.__nextLink__ === <span class="string">'string'</span>)){
+        <span class="keyword">throw</span> <span class="string">"__nextLink__ must be a string"</span>
     }
     
-    <span class="keyword">var</span> trail = chain._nextLink.split(<span class="string">'.'</span>);</pre></div></div>
+    <span class="keyword">var</span> trail = chain.__nextLink__.split(<span class="string">'.'</span>);</pre></div></div>
             
         </li>
         
