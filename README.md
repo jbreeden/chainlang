@@ -59,20 +59,15 @@ That's the basic idea.
 
 # Features
 
-Chainlang provides a small but powerful set of features to control the semantics of your generated API. Some of these features, like the `_breaksChain` method discussed in the introduction, are fields or methods accessible via `this` within the methods of your language specification object. Others, like `_wrapper`s, are special nodes that can be placed within your specification. (For an interesting use of `_wrapper` nodes, see the section on "Join Wrappers" in the [full fromjs example](http://jbreeden.github.io/chainlang/fromjs/from.html))
+Chainlang provides a small but powerful set of features to control the semantics of your generated API.
+Some of these features, like the `_breaksChain` method discussed in the introduction, are fields or methods
+accessible via `this` within the methods of your language specification object. Others, like `_wrapper`, are
+special nodes that can be placed within your specification. (For an interesting use of `_wrapper` nodes, see
+the section on "Join Wrappers" in the [full fromjs example](http://jbreeden.github.io/chainlang/fromjs/from.html))
 
-### Basic
+To see all the available features, check out the [chainlang spec](http://jbreeden.github.io/chainlang/spec/spec.html).
 
-TODO (`_subject`, `_data`, `_prev`, `_breaksChain`, using `_breaksChain` conditionally to short-circuit)
-
-### Advanced
-
-TODO (`_nextLink`, `_wrapper`, automatic binding at arbitrary depth)
-
-# More Information
-
-Chainlang is still young, so the documentation is a bit sparse (I'm working on it). However, it is already useful and certainly mature enough to handle some constructive feedback! If you're interested in using chainlang, or providing some feedback on the direction it's taking, have a look at some of the documents below to get a fuller picture of what the library offers.
+# More Resources
 
 * [Example: Creating a full-feature fromjs library](http://jbreeden.github.io/chainlang/fromjs/from.html)
 * [Annotated source of chainlang.js](http://jbreeden.github.io/chainlang/source/chainlang.html)
-* [Spec](http://jbreeden.github.io/chainlang/spec/spec.html) (As in, `mocha --reporter doc ./test/test.chainlang.js`)
