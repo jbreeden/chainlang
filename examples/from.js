@@ -143,7 +143,7 @@ fromSpec.join = function join(right){
     
     // Only want to expose children of join as the next possible
     // methods in the chain. (Every 'join' must be followed by an 'on')
-    this._nextLink = "join";
+    this._linksTo("join");
 }
 
 // Join Wrappers

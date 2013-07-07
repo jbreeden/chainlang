@@ -47,6 +47,10 @@ chainlang.create = function(lang){
     theChain._breaksChain = function(returnValue){
         theChain.__break__ = true;
     }
+    
+    theChain._linksTo = function(nextLink){
+        theChain.__nextLink__ = nextLink
+    }
 
     // ### chain expression constructor
     // ---
@@ -62,9 +66,9 @@ chainlang.create = function(lang){
         theChain._subject = obj;
         theChain._data = {};
         theChain._prev = null;
-        theChain._nextLink = null;
+        theChain.__nextLink__ = null;
         theChain.__break__ = false;
-        theChain.__stack_height__ = 0;
+        theChain.__stackHeight__ = 0;
         
         return theChain;
     }
@@ -149,7 +153,7 @@ function createChainableProxiedMethod(chain, fn, wrappers){
         wrappers = captureArray(wrappers);
 
     proxiedMethod = function(){
-        chain.__stack_height__ = wrappers.length;
+        chain.__stackHeight__ = wrappers.length;
         chain._prev = fn.apply(chain, arguments);
         return returnValue(chain);
     }
@@ -173,7 +177,7 @@ function createChainableProxiedMethod(chain, fn, wrappers){
 function createWrappedChainableMethod(opt){
     return function(){
         opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
-        opt.chain.__stack_height__ = opt.stackHeight;
+        opt.chain.__stackHeight__ = opt.stackHeight;
         
         return returnValue(opt.chain);
     }
@@ -182,9 +186,9 @@ function createWrappedChainableMethod(opt){
 // Returns `chain.__return__` if `chain.__break__` is set,
 // or else returns the chain
 function returnValue(chain){
-    if(chain.__stack_height__ === 0){
+    if(chain.__stackHeight__ === 0){
         var nextLink = getNextLink(chain);
-        chain._nextLink = null;
+        chain.__nextLink__ = null;
         
         if(chain.__break__){
             return chain._prev;
@@ -198,14 +202,14 @@ function returnValue(chain){
 }
 
 function getNextLink(chain){
-    if(!chain._nextLink){
+    if(!chain.__nextLink__){
         return undefined;
     }
-    if(!(typeof chain._nextLink === 'string')){
-        throw "_nextLink must be a string"
+    if(!(typeof chain.__nextLink__ === 'string')){
+        throw "__nextLink__ must be a string"
     }
     
-    var trail = chain._nextLink.split('.');
+    var trail = chain.__nextLink__.split('.');
     
     // Walk the trail from the chain root
     var nextLink = chain;
