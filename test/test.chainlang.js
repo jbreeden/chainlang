@@ -295,6 +295,39 @@ describe('wrappers', function(){
     });
 });
 
+describe('Any method in the language spec', function(){
+    it('may call `this.linksTo` to return a descendant node of the chain object instead of the root', function(){
+        var rangeSpec = {
+            from: function(num){
+                this._data.from = num;
+
+                // From `_linksTo` itself to expose its children
+                // as the next possible calls in the chain
+                this._linksTo('from');
+            }
+        };
+
+        rangeSpec.from.to = function(num){
+            this._breaksChain();
+
+            var result = [];
+            for(i = this._data.from; i <= num; ++i){
+                result.push(i);
+            }
+
+            return result;
+        }
+
+        var range = chainlang.create(rangeSpec);
+
+        expect(
+            range().from(2).to(7)
+        ).to.eql(
+            [2, 3, 4, 5, 6, 7]
+        );
+    })
+});
+
 function allFieldsOfFirstAppearInSecond(obj1, obj2){
     var props1 = [];
     getAllPropertyNameStrings(props1, obj1, "");
