@@ -54,7 +54,9 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- */</span></pre></div></div>
+ */</span>
+
+(<span class="keyword">function</span>(){</pre></div></div>
             
         </li>
         
@@ -81,7 +83,7 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> chainlang = module.exports;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> chainlang;</pre></div></div>
             
         </li>
         
@@ -92,15 +94,16 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p><code>chainlang.create</code> accepts a <code>lang</code> parameter and returns
-a <a href="#chain"><code>chain</code></a> constructor that is used to begin chained
-expressions.</p>
+              <p>Node-style export</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>chainlang.create = <span class="keyword">function</span>(lang){
-    <span class="keyword">if</span>(arguments.length !== <span class="number">1</span>){
-        <span class="keyword">throw</span> <span class="string">"chainlang.create expects one argument: An object containing the methods of the new chain language"</span>;
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(<span class="keyword">typeof</span> module !== <span class="string">'undefined'</span> &amp;&amp; module.exports){
+        chainlang = module.exports;
+    }
+    <span class="keyword">else</span>{
+        chainlang = {};
+        window.chainlang = chainlang;
     }</pre></div></div>
             
         </li>
@@ -112,14 +115,16 @@ expressions.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p><code>theChain</code> is a per-language singleton. That is, each chained
-expression will access data from the same &quot;chain&quot; object. This 
-means that chains cannot be arbitrarily saved to variables and 
-interleaved with other chain expressions of the same language.</p>
+              <p><code>chainlang.create</code> accepts a <code>lang</code> parameter and returns
+a <a href="#chain"><code>chain</code></a> constructor that is used to begin chained
+expressions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> theChain = createChainableProxy(lang);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    chainlang.create = <span class="keyword">function</span>(lang){
+        <span class="keyword">if</span>(arguments.length !== <span class="number">1</span>){
+            <span class="keyword">throw</span> <span class="string">"chainlang.create expects one argument: An object containing the methods of the new chain language"</span>;
+        }</pre></div></div>
             
         </li>
         
@@ -130,17 +135,14 @@ interleaved with other chain expressions of the same language.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p><code>_breaksChain</code> is used to break the chain and return a value</p>
+              <p><code>theChain</code> is a per-language singleton. That is, each chained
+expression will access data from the same &quot;chain&quot; object. This 
+means that chains cannot be arbitrarily saved to variables and 
+interleaved with other chain expressions of the same language.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    theChain._breaksChain = <span class="keyword">function</span>(returnValue){
-        theChain.__break__ = <span class="literal">true</span>;
-    }
-    
-    theChain._linksTo = <span class="keyword">function</span>(nextLink){
-        theChain.__nextLink__ = nextLink
-    }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> theChain = createChainableProxy(lang);</pre></div></div>
             
         </li>
         
@@ -148,13 +150,20 @@ interleaved with other chain expressions of the same language.</p>
         <li id="section-7">
             <div class="annotation">
               
-              <div class="pilwrap for-h3">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <h3>chain expression constructor</h3>
-<hr>
+              <p><code>_breaksChain</code> is used to break the chain and return a value</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>        theChain._breaksChain = <span class="keyword">function</span>(returnValue){
+            theChain.__break__ = <span class="literal">true</span>;
+        }
+        
+        theChain._linksTo = <span class="keyword">function</span>(nextLink){
+            theChain.__nextLink__ = nextLink
+        }</pre></div></div>
             
         </li>
         
@@ -162,19 +171,13 @@ interleaved with other chain expressions of the same language.</p>
         <li id="section-8">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h3">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>The <code>chain</code> function is the constructor for chained expressions
-of the new <code>chainlang</code> type. 
-<a id="chain"></a></p>
+              <h3>chain expression constructor</h3>
+<hr>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">chain</span><span class="params">(obj)</span>{</span>
-        <span class="keyword">if</span>(arguments.length &gt; <span class="number">1</span>){
-            <span class="keyword">throw</span> <span class="string">"Chain constructors can only accept one argument"</span>;
-        }</pre></div></div>
             
         </li>
         
@@ -185,19 +188,16 @@ of the new <code>chainlang</code> type.
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>Resetting the properties on <code>theChain</code> for the new expression</p>
+              <p>The <code>chain</code> function is the constructor for chained expressions
+of the new <code>chainlang</code> type. 
+<a id="chain"></a></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        theChain._subject = obj;
-        theChain._data = {};
-        theChain._prev = <span class="literal">null</span>;
-        theChain.__nextLink__ = <span class="literal">null</span>;
-        theChain.__break__ = <span class="literal">false</span>;
-        theChain.__stackHeight__ = <span class="number">0</span>;
-        
-        <span class="keyword">return</span> theChain;
-    }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="function"><span class="keyword">function</span> <span class="title">chain</span><span class="params">(obj)</span>{</span>
+            <span class="keyword">if</span>(arguments.length &gt; <span class="number">1</span>){
+                <span class="keyword">throw</span> <span class="string">"Chain constructors can only accept one argument"</span>;
+            }</pre></div></div>
             
         </li>
         
@@ -208,12 +208,19 @@ of the new <code>chainlang</code> type.
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p>Returning the <code>chain</code> constructor to the client of <code>chainlang.create</code></p>
+              <p>Resetting the properties on <code>theChain</code> for the new expression</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">return</span> chain;
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            theChain._subject = obj;
+            theChain._data = {};
+            theChain._prev = <span class="literal">null</span>;
+            theChain.__nextLink__ = <span class="literal">null</span>;
+            theChain.__break__ = <span class="literal">false</span>;
+            theChain.__stackHeight__ = <span class="number">0</span>;
+            
+            <span class="keyword">return</span> theChain;
+        }</pre></div></div>
             
         </li>
         
@@ -221,12 +228,15 @@ of the new <code>chainlang</code> type.
         <li id="section-11">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <h2>Privates</h2>
+              <p>Returning the <code>chain</code> constructor to the client of <code>chainlang.create</code></p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">return</span> chain;
+    }</pre></div></div>
             
         </li>
         
@@ -234,27 +244,12 @@ of the new <code>chainlang</code> type.
         <li id="section-12">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>This function kicks off the recursive traversal of the language
-object to create an object with chainable methods. (These are
-essentially &quot;proxied&quot; versions of the methods found on the language object.)</p>
+              <h2>Privates</h2>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">createChainableProxy</span><span class="params">(language)</span>{</span>
-    <span class="keyword">var</span> wrappers = [],
-        chain = {};
-
-    createChainableProxyNode(
-        chain,
-        chain, 
-        language,
-        wrappers);
-
-    <span class="keyword">return</span> chain;
-};</pre></div></div>
             
         </li>
         
@@ -265,19 +260,24 @@ essentially &quot;proxied&quot; versions of the methods found on the language ob
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>This is the self-recursive method for construction of the chainable object</p>
+              <p>This function kicks off the recursive traversal of the language
+object to create an object with chainable methods. (These are
+essentially &quot;proxied&quot; versions of the methods found on the language object.)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">createChainableProxyNode</span><span class="params">(node, chain, language, wrappers)</span>{</span>
-    <span class="keyword">var</span> hasWrapper = hasWrapperMethod(language);
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">createChainableProxy</span><span class="params">(language)</span>{</span>
+        <span class="keyword">var</span> wrappers = [],
+            chain = {};
 
-    <span class="keyword">if</span>(hasWrapper){
-        wrappers.push(language[<span class="string">'_wrapper'</span>]);
-    }
+        createChainableProxyNode(
+            chain,
+            chain, 
+            language,
+            wrappers);
 
-
-    <span class="keyword">for</span>(<span class="keyword">var</span> propName <span class="keyword">in</span> language){</pre></div></div>
+        <span class="keyword">return</span> chain;
+    };</pre></div></div>
             
         </li>
         
@@ -288,74 +288,19 @@ essentially &quot;proxied&quot; versions of the methods found on the language ob
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <p>Properties named with a leading underscore are reserved for chain-level
-semi-hidden data to avoid conflicts with language methods. So, for now
-we&#39;ll just ignore any we come across. May want to throw an error later.</p>
+              <p>This is the self-recursive method for construction of the chainable object</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(propName[<span class="number">0</span>] == <span class="string">"_"</span>){
-            <span class="keyword">continue</span>;
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">createChainableProxyNode</span><span class="params">(node, chain, language, wrappers)</span>{</span>
+        <span class="keyword">var</span> hasWrapper = hasWrapperMethod(language);
+
+        <span class="keyword">if</span>(hasWrapper){
+            wrappers.push(language[<span class="string">'_wrapper'</span>]);
         }
 
-        <span class="keyword">var</span> prop = language[propName];
-        <span class="keyword">if</span>(prop === <span class="literal">undefined</span> || prop === <span class="literal">null</span>){
-           <span class="keyword">continue</span>;
-        }
-        
-        <span class="keyword">var</span> makeNode = <span class="literal">true</span>;
-        <span class="keyword">if</span>(<span class="keyword">typeof</span> prop == <span class="string">"function"</span>){
-            node[propName] = createChainableProxiedMethod(chain, prop, wrappers);
-        }
-        <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span> prop == <span class="string">"object"</span>){
-            node[propName] = {};
-        }
-        <span class="keyword">else</span>{
-            makeNode = <span class="literal">false</span>;
-            node[propName] = prop;
-        }
-        
-        <span class="keyword">if</span>(makeNode){
-            createChainableProxyNode(node[propName], chain, prop, wrappers);
-        }
-    }
 
-    <span class="keyword">if</span>(hasWrapper){
-        wrappers.pop();
-    }
-}
-
-<span class="function"><span class="keyword">function</span> <span class="title">hasWrapperMethod</span><span class="params">(obj)</span>{</span>
-    <span class="keyword">return</span> (
-        obj[<span class="string">'_wrapper'</span>] !== <span class="literal">undefined</span>
-        &amp;&amp; <span class="keyword">typeof</span> obj[<span class="string">'_wrapper'</span>] === <span class="string">"function"</span>
-    );
-}
-
-<span class="function"><span class="keyword">function</span> <span class="title">createChainableProxiedMethod</span><span class="params">(chain, fn, wrappers)</span>{</span>
-    <span class="keyword">var</span> i,
-        proxiedMethod,
-        wrappers = captureArray(wrappers);
-
-    proxiedMethod = <span class="keyword">function</span>(){
-        chain.__stackHeight__ = wrappers.length;
-        chain._prev = fn.apply(chain, arguments);
-        <span class="keyword">return</span> returnValue(chain);
-    }
-
-    <span class="keyword">if</span>(wrappers.length &gt; <span class="number">0</span>){
-        <span class="keyword">for</span>(i = wrappers.length - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i -= <span class="number">1</span>){
-            proxiedMethod = createWrappedChainableMethod({
-                    chain: chain,
-                    wrapperFunction: wrappers[i],
-                    proxiedMethod: proxiedMethod,
-                    stackHeight: i
-                });
-        }
-    }
-
-    <span class="keyword">return</span> proxiedMethod;
-}</pre></div></div>
+        <span class="keyword">for</span>(<span class="keyword">var</span> propName <span class="keyword">in</span> language){</pre></div></div>
             
         </li>
         
@@ -366,19 +311,74 @@ we&#39;ll just ignore any we come across. May want to throw an error later.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p><code>opt</code> options arguments should contain fields
-<code>chain</code>, <code>wrapperFunction</code>, <code>proxiedMethod</code>, <code>stackHeight</code></p>
+              <p>Properties named with a leading underscore are reserved for chain-level
+semi-hidden data to avoid conflicts with language methods. So, for now
+we&#39;ll just ignore any we come across. May want to throw an error later.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">createWrappedChainableMethod</span><span class="params">(opt)</span>{</span>
-    <span class="keyword">return</span> <span class="keyword">function</span>(){
-        opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
-        opt.chain.__stackHeight__ = opt.stackHeight;
-        
-        <span class="keyword">return</span> returnValue(opt.chain);
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(propName[<span class="number">0</span>] == <span class="string">"_"</span>){
+                <span class="keyword">continue</span>;
+            }
+
+            <span class="keyword">var</span> prop = language[propName];
+            <span class="keyword">if</span>(prop === <span class="literal">undefined</span> || prop === <span class="literal">null</span>){
+               <span class="keyword">continue</span>;
+            }
+            
+            <span class="keyword">var</span> makeNode = <span class="literal">true</span>;
+            <span class="keyword">if</span>(<span class="keyword">typeof</span> prop == <span class="string">"function"</span>){
+                node[propName] = createChainableProxiedMethod(chain, prop, wrappers);
+            }
+            <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">typeof</span> prop == <span class="string">"object"</span>){
+                node[propName] = {};
+            }
+            <span class="keyword">else</span>{
+                makeNode = <span class="literal">false</span>;
+                node[propName] = prop;
+            }
+            
+            <span class="keyword">if</span>(makeNode){
+                createChainableProxyNode(node[propName], chain, prop, wrappers);
+            }
+        }
+
+        <span class="keyword">if</span>(hasWrapper){
+            wrappers.pop();
+        }
     }
-}</pre></div></div>
+
+    <span class="function"><span class="keyword">function</span> <span class="title">hasWrapperMethod</span><span class="params">(obj)</span>{</span>
+        <span class="keyword">return</span> (
+            obj[<span class="string">'_wrapper'</span>] !== <span class="literal">undefined</span>
+            &amp;&amp; <span class="keyword">typeof</span> obj[<span class="string">'_wrapper'</span>] === <span class="string">"function"</span>
+        );
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">createChainableProxiedMethod</span><span class="params">(chain, fn, wrappers)</span>{</span>
+        <span class="keyword">var</span> i,
+            proxiedMethod,
+            wrappers = captureArray(wrappers);
+
+        proxiedMethod = <span class="keyword">function</span>(){
+            chain.__stackHeight__ = wrappers.length;
+            chain._prev = fn.apply(chain, arguments);
+            <span class="keyword">return</span> returnValue(chain);
+        }
+
+        <span class="keyword">if</span>(wrappers.length &gt; <span class="number">0</span>){
+            <span class="keyword">for</span>(i = wrappers.length - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i -= <span class="number">1</span>){
+                proxiedMethod = createWrappedChainableMethod({
+                        chain: chain,
+                        wrapperFunction: wrappers[i],
+                        proxiedMethod: proxiedMethod,
+                        stackHeight: i
+                    });
+            }
+        }
+
+        <span class="keyword">return</span> proxiedMethod;
+    }</pre></div></div>
             
         </li>
         
@@ -389,36 +389,19 @@ we&#39;ll just ignore any we come across. May want to throw an error later.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>Returns <code>chain.__return__</code> if <code>chain.__break__</code> is set,
-or else returns the chain</p>
+              <p><code>opt</code> options arguments should contain fields
+<code>chain</code>, <code>wrapperFunction</code>, <code>proxiedMethod</code>, <code>stackHeight</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">returnValue</span><span class="params">(chain)</span>{</span>
-    <span class="keyword">if</span>(chain.__stackHeight__ === <span class="number">0</span>){
-        <span class="keyword">var</span> nextLink = getNextLink(chain);
-        chain.__nextLink__ = <span class="literal">null</span>;
-        
-        <span class="keyword">if</span>(chain.__break__){
-            <span class="keyword">return</span> chain._prev;
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">createWrappedChainableMethod</span><span class="params">(opt)</span>{</span>
+        <span class="keyword">return</span> <span class="keyword">function</span>(){
+            opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
+            opt.chain.__stackHeight__ = opt.stackHeight;
+            
+            <span class="keyword">return</span> returnValue(opt.chain);
         }
-        <span class="keyword">if</span>(nextLink){
-            <span class="keyword">return</span> nextLink;
-        }
-    }
-    
-    <span class="keyword">return</span> chain;
-}
-
-<span class="function"><span class="keyword">function</span> <span class="title">getNextLink</span><span class="params">(chain)</span>{</span>
-    <span class="keyword">if</span>(!chain.__nextLink__){
-        <span class="keyword">return</span> <span class="literal">undefined</span>;
-    }
-    <span class="keyword">if</span>(!(<span class="keyword">typeof</span> chain.__nextLink__ === <span class="string">'string'</span>)){
-        <span class="keyword">throw</span> <span class="string">"__nextLink__ must be a string"</span>
-    }
-    
-    <span class="keyword">var</span> trail = chain.__nextLink__.split(<span class="string">'.'</span>);</pre></div></div>
+    }</pre></div></div>
             
         </li>
         
@@ -429,17 +412,36 @@ or else returns the chain</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <p>Walk the trail from the chain root</p>
+              <p>Returns <code>chain.__return__</code> if <code>chain.__break__</code> is set,
+or else returns the chain</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> nextLink = chain;
-    trail.forEach(<span class="keyword">function</span>(node){
-        nextLink = nextLink[node];
-    });
-    
-    <span class="keyword">return</span> nextLink;
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">returnValue</span><span class="params">(chain)</span>{</span>
+        <span class="keyword">if</span>(chain.__stackHeight__ === <span class="number">0</span>){
+            <span class="keyword">var</span> nextLink = getNextLink(chain);
+            chain.__nextLink__ = <span class="literal">null</span>;
+            
+            <span class="keyword">if</span>(chain.__break__){
+                <span class="keyword">return</span> chain._prev;
+            }
+            <span class="keyword">if</span>(nextLink){
+                <span class="keyword">return</span> nextLink;
+            }
+        }
+        
+        <span class="keyword">return</span> chain;
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">getNextLink</span><span class="params">(chain)</span>{</span>
+        <span class="keyword">if</span>(!chain.__nextLink__){
+            <span class="keyword">return</span> <span class="literal">undefined</span>;
+        }
+        <span class="keyword">if</span>(!(<span class="keyword">typeof</span> chain.__nextLink__ === <span class="string">'string'</span>)){
+            <span class="keyword">throw</span> <span class="string">"__nextLink__ must be a string"</span>
+        }
+        
+        <span class="keyword">var</span> trail = chain.__nextLink__.split(<span class="string">'.'</span>);</pre></div></div>
             
         </li>
         
@@ -450,20 +452,42 @@ or else returns the chain</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
+              <p>Walk the trail from the chain root</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> nextLink = chain;
+        trail.forEach(<span class="keyword">function</span>(node){
+            nextLink = nextLink[node];
+        });
+        
+        <span class="keyword">return</span> nextLink;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
               <p>&quot;Captures&quot; an array. (i.e. makes a new array with the same references
  to avoid having the contents of a closed-over array changed externally)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">captureArray</span><span class="params">(array)</span>{</span>
-    <span class="keyword">var</span> capturedArray = [];
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">captureArray</span><span class="params">(array)</span>{</span>
+        <span class="keyword">var</span> capturedArray = [];
 
-    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; array.length; i += <span class="number">1</span>){
-        capturedArray[i] = array[i];
+        <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; array.length; i += <span class="number">1</span>){
+            capturedArray[i] = array[i];
+        }
+
+        <span class="keyword">return</span> capturedArray;
     }
-
-    <span class="keyword">return</span> capturedArray;
-}</pre></div></div>
+}())</pre></div></div>
             
         </li>
         
