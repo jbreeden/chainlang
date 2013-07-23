@@ -76,10 +76,10 @@ describe('A chain object', function(){
         );
     });
     
-    it('contains a "_breaksChain" method that prevents the implicit return of the chain object', function(){
+    it('contains a "this._link.breaks.chain" method that prevents the implicit return of the chain object', function(){
         var chain = chainlang.create({
             iBreakTheChain: function(){
-                this._breaksChain();
+                this._link.breaks.chain();
                 return 'some scalar';
             }
         });
@@ -95,7 +95,7 @@ describe('A chain object', function(){
                 returnsOne: function(){ return 1; },
                 returnsTwo: function(){ return 2; },
                 breaksAndReturnsPrev: function(){
-                    this._breaksChain();
+                    this._link.breaks.chain();
                     return this._prev;
                 }
             });
@@ -124,7 +124,7 @@ describe('A chain object', function(){
     it('contains a "_subject" property, which references the optional parameter to the chain function', function(){
         var chain = chainlang.create({
             getSubject: function(){
-                this._breaksChain();
+                this._link.breaks.chain();
                 return this._subject;
             }
         });
@@ -224,7 +224,7 @@ describe('Any node in the chain object graph', function(){
         var chainSpec = {};
         chainSpec.prop = spy; /* spy is a function, so prop is a method */
         chainSpec.prop.methodsStillAvailable = function(){
-            this._breaksChain();
+            this._link.breaks.chain();
             return true;
         }
         
@@ -239,7 +239,7 @@ describe('Any node in the chain object graph', function(){
     it('may include a "_wrapper" method, used to wrap descendant functions to process args/output', function(){
         var lang = {
             returnsArg: function(arg){
-                this._breaksChain();
+                this._link.breaks.chain();
                 return arg;
             }
         };
@@ -262,7 +262,7 @@ describe('wrappers', function(){
     it('may be arbitrarily nested', function(){
         // Defining a `returnsArg` node (will be used mutiple times in langSpec)
         var argReturningNode = function(arg){
-            this._breaksChain()
+            this._link.breaks.chain()
             return arg;
         }
         
@@ -296,19 +296,19 @@ describe('wrappers', function(){
 });
 
 describe('Any method in the language spec', function(){
-    it('may call `this.linksTo` to return a descendant node of the chain object instead of the root', function(){
+    it('may call `this._link.binds.to` to return an object than the root of the chain object instead of the root', function(){
         var rangeSpec = {
             from: function(num){
                 this._data.from = num;
 
-                // From `_linksTo` itself to expose its children
+                // `this._link.binds.to` itself to expose its children
                 // as the next possible calls in the chain
-                this._linksTo('from');
+                this._link.binds.to(this.from);
             }
         };
 
         rangeSpec.from.to = function(num){
-            this._breaksChain();
+            this._link.breaks.chain();
 
             var result = [];
             for(i = this._data.from; i <= num; ++i){

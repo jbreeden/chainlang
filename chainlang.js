@@ -52,13 +52,15 @@
         // interleaved with other chain expressions of the same language.
         var theChain = createChainableProxy(lang);
 
-        // `_breaksChain` is used to break the chain and return a value
-        theChain._breaksChain = function(returnValue){
+        theChain._link = {};
+        theChain._link.breaks = {};
+        theChain._link.breaks.chain = function(returnValue){
             theChain.__break__ = true;
         }
         
-        theChain._linksTo = function(nextLink){
-            theChain.__nextLink__ = nextLink
+        theChain._link.binds = {};
+        theChain._link.binds.to = function(nextLink){
+            theChain.__nextLink__ = nextLink;
         }
 
         // ### chain expression constructor
@@ -75,7 +77,7 @@
             theChain._subject = obj;
             theChain._data = {};
             theChain._prev = null;
-            theChain.__nextLink__ = null;
+            theChain.__nextLink__ = undefined;
             theChain.__break__ = false;
             theChain.__stackHeight__ = 0;
             
@@ -193,16 +195,16 @@
     }
 
     // Returns `chain.__return__` if `chain.__break__` is set,
-    // or else returns the chain
+    // or `chain.__nextLink__` if it is set, or else returns
+    // the chain.
     function returnValue(chain){
-        if(chain.__stackHeight__ === 0){
-            var nextLink = getNextLink(chain);
-            chain.__nextLink__ = null;
-            
-            if(chain.__break__){
+        if (chain.__stackHeight__ === 0) {
+            if (chain.__break__) {
                 return chain._prev;
             }
-            if(nextLink){
+            if (undefined != chain.__nextLink__) {
+                var nextLink = chain.__nextLink__;
+                chain.__nextLink__ = undefined;
                 return nextLink;
             }
         }
@@ -210,28 +212,9 @@
         return chain;
     }
 
-    function getNextLink(chain){
-        if(!chain.__nextLink__){
-            return undefined;
-        }
-        if(!(typeof chain.__nextLink__ === 'string')){
-            throw "__nextLink__ must be a string"
-        }
-        
-        var trail = chain.__nextLink__.split('.');
-        
-        // Walk the trail from the chain root
-        var nextLink = chain;
-        trail.forEach(function(node){
-            nextLink = nextLink[node];
-        });
-        
-        return nextLink;
-    }
-
     // "Captures" an array. (i.e. makes a new array with the same references
     //  to avoid having the contents of a closed-over array changed externally)
-    function captureArray(array){
+    function captureArray(array) {
         var capturedArray = [];
 
         for(i = 0; i < array.length; i += 1){
@@ -240,5 +223,4 @@
 
         return capturedArray;
     }
-}())
-
+}());

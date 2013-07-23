@@ -16,7 +16,7 @@ var fromSpec = {};
 //</pre>
 fromSpec.take = function take(count){
     /* `take` method breaks the chain and returns its own return value */
-    this._breaksChain();
+    this._link.breaks.chain();
 
     var result = [];
     /* this._subject is initialized with the argument to from(...) */
@@ -32,7 +32,7 @@ fromSpec.take = function take(count){
 // from(array).take.all();
 // </pre>
 fromSpec.take.all = function all(){
-    this._breaksChain();
+    this._link.breaks.chain();
     return this._subject;
 }
 
@@ -41,7 +41,7 @@ fromSpec.take.all = function all(){
 // from(array).take.first();
 // </pre>
 fromSpec.take.first = function first(){
-    this._breaksChain();
+    this._link.breaks.chain();
     
     if(!(this._subject.length >= 1)){
         return;
@@ -54,7 +54,7 @@ fromSpec.take.first = function first(){
 // from(array).take.last();
 // </pre>
 fromSpec.take.last = function last(){
-    this._breaksChain();
+    this._link.breaks.chain();
     
     if(!(this._subject.length >= 1)){
         return;
@@ -143,7 +143,7 @@ fromSpec.join = function join(right){
     
     // Only want to expose children of join as the next possible
     // methods in the chain. (Every 'join' must be followed by an 'on')
-    this._linksTo("join");
+    this._link.binds.to(this.join);
 }
 
 // Join Wrappers

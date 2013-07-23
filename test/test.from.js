@@ -109,6 +109,7 @@ describe('left.join(right).on(key)', function(){
     ];
 
     it('makes a left outter join of _subject with "right" where _subject[key] and right[key] match', function(){
+        debugger;
         var result = 
             from(left)
             .left.join(right)
