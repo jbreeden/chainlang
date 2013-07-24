@@ -15,7 +15,7 @@ var fromSpec = {
     },
     take: {
         all: function(){
-            this._breaksChain();
+            this._link.breaks.chain();
             return this._subject;
         }
     }
