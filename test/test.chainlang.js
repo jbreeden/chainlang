@@ -15,6 +15,20 @@ describe('chainlang.create(lang)', function(){
     });
 });
 
+describe('chainlang.append(obj, path, node)', function(){
+    it('Adds descendant nodes and all required ancestors to an object (like mkdirp)', function(){
+        var manualCreation = {};
+        manualCreation.has = {};
+        manualCreation.has.a = {};
+        manualCreation.has.a.greatGrandchild = 1;
+        
+        var convenientCreation = {};
+        chainlang.append(convenientCreation, 'has.a.greatGrandchild', 1);
+        
+        expect(manualCreation).to.eql(convenientCreation);
+    });
+});
+
 describe('A chain function returned from chainlang.create', function(){
     it('Accepts an optional argument, and throws if more than one argument is provided', function(){
         var chain = chainlang.create({});

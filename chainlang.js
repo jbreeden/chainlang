@@ -25,18 +25,48 @@
  */
 
 (function(){
+    "use strict";
+    
     // chainlang
     // ---------
     var chainlang;
 
-    // Node-style export
-    if(typeof module !== 'undefined' && module.exports){
+    if (typeof module !== 'undefined' && module.exports) {
+        // Node-style export
         chainlang = module.exports;
-    }
-    else{
+    } else {
+        // Browser-syle export
         chainlang = {};
         window.chainlang = chainlang;
     }
+    
+    // chainlang.append
+    // ----------------
+    
+    // Adds a descendant node at any depth, creating the parent
+    // node along the way if they are undefined.
+    chainlang.append = function (obj, path, node) {
+        var descendants = path.split('.');
+        
+        var currentNode = obj;
+        var finalIndex = descendants.length - 1;
+        
+        for (var i = 0; i <= finalIndex; ++i) {
+            var childName = descendants[i];
+            var child = currentNode[childName];
+            
+            if (i !== finalIndex) {
+                // Make the child if it doesn't exist
+                currentNode[childName] = (undefined === child) ? {} : child; 
+                currentNode = currentNode[childName];
+            } else {
+                currentNode[childName] = node;
+            }
+        }
+    };
+    
+    // chainlang.create
+    // ----------------
 
     // `chainlang.create` accepts a `lang` parameter and returns
     // a [`chain`](#chain) constructor that is used to begin chained
@@ -51,17 +81,14 @@
         // means that chains cannot be arbitrarily saved to variables and 
         // interleaved with other chain expressions of the same language.
         var theChain = createChainableProxy(lang);
-
-        theChain._link = {};
-        theChain._link.breaks = {};
-        theChain._link.breaks.chain = function(returnValue){
-            theChain.__break__ = true;
-        }
         
-        theChain._link.binds = {};
-        theChain._link.binds.to = function(nextLink){
+        chainlang.append(theChain, '_link.breaks.chain', function () {
+            theChain.__break__ = true;
+        });
+        
+        chainlang.append(theChain, '_link.binds.to', function (nextLink) {
             theChain.__nextLink__ = nextLink;
-        }
+        });
 
         // ### chain expression constructor
         // ---
@@ -79,7 +106,7 @@
             theChain._prev = null;
             theChain.__nextLink__ = undefined;
             theChain.__break__ = false;
-            theChain.__stackHeight__ = 0;
+            theChain.__wrapperDepth__ = 0;
             
             return theChain;
         }
@@ -92,7 +119,7 @@
     // --------
 
     // This function kicks off the recursive traversal of the language
-    // object to create an object with chainable methods. (These are
+    // spec object to create an object with chainable methods. (These are
     // essentially "proxied" versions of the methods found on the language object.)
     function createChainableProxy(language){
         var wrappers = [],
@@ -164,7 +191,7 @@
             wrappers = captureArray(wrappers);
 
         proxiedMethod = function(){
-            chain.__stackHeight__ = wrappers.length;
+            chain.__wrapperDepth__ = wrappers.length;
             chain._prev = fn.apply(chain, arguments);
             return returnValue(chain);
         }
@@ -188,7 +215,7 @@
     function createWrappedChainableMethod(opt){
         return function(){
             opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
-            opt.chain.__stackHeight__ = opt.stackHeight;
+            opt.chain.__wrapperDepth__ = opt.stackHeight;
             
             return returnValue(opt.chain);
         }
@@ -198,7 +225,7 @@
     // or `chain.__nextLink__` if it is set, or else returns
     // the chain.
     function returnValue(chain){
-        if (chain.__stackHeight__ === 0) {
+        if (chain.__wrapperDepth__ === 0) {
             if (chain.__break__) {
                 return chain._prev;
             }
@@ -217,7 +244,7 @@
     function captureArray(array) {
         var capturedArray = [];
 
-        for(i = 0; i < array.length; i += 1){
+        for(var i = 0; i < array.length; i += 1){
             capturedArray[i] = array[i];
         }
 
