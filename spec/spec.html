@@ -38,6 +38,21 @@ expect(newLang).to.be.a('function');</code></pre></dd>
       </dl>
     </section>
     <section class="suite">
+      <h1>chainlang.append(obj, path, node)</h1>
+      <dl>
+        <dt>Adds descendant nodes and all required ancestors to an object (like mkdirp)</dt>
+        <dd><pre><code>var manualCreation = {};
+manualCreation.has = {};
+manualCreation.has.a = {};
+manualCreation.has.a.greatGrandchild = 1;
+
+var convenientCreation = {};
+chainlang.append(convenientCreation, 'has.a.greatGrandchild', 1);
+
+expect(manualCreation).to.eql(convenientCreation);</code></pre></dd>
+      </dl>
+    </section>
+    <section class="suite">
       <h1>A chain function returned from chainlang.create</h1>
       <dl>
         <dt>Accepts an optional argument, and throws if more than one argument is provided</dt>
@@ -97,10 +112,10 @@ expect(
 ).to.eql(
     chain()
 );</code></pre></dd>
-        <dt>contains a &quot;_breaksChain&quot; method that prevents the implicit return of the chain object</dt>
+        <dt>contains a &quot;this._link.breaks.chain&quot; method that prevents the implicit return of the chain object</dt>
         <dd><pre><code>var chain = chainlang.create({
     iBreakTheChain: function(){
-        this._breaksChain();
+        this._link.breaks.chain();
         return 'some scalar';
     }
 });
@@ -114,7 +129,7 @@ expect(
         returnsOne: function(){ return 1; },
         returnsTwo: function(){ return 2; },
         breaksAndReturnsPrev: function(){
-            this._breaksChain();
+            this._link.breaks.chain();
             return this._prev;
         }
     });
@@ -139,7 +154,7 @@ expect(hasOwnKey).to.be(false);</code></pre></dd>
         <dt>contains a &quot;_subject&quot; property, which references the optional parameter to the chain function</dt>
         <dd><pre><code>var chain = chainlang.create({
     getSubject: function(){
-        this._breaksChain();
+        this._link.breaks.chain();
         return this._subject;
     }
 });
@@ -234,7 +249,7 @@ expect(
 var chainSpec = {};
 chainSpec.prop = spy; /* spy is a function, so prop is a method */
 chainSpec.prop.methodsStillAvailable = function(){
-    this._breaksChain();
+    this._link.breaks.chain();
     return true;
 }
 
@@ -247,7 +262,7 @@ expect(chain().prop.methodsStillAvailable()).to.be(true);</code></pre></dd>
         <dt>may include a &quot;_wrapper&quot; method, used to wrap descendant functions to process args/output</dt>
         <dd><pre><code>var lang = {
     returnsArg: function(arg){
-        this._breaksChain();
+        this._link.breaks.chain();
         return arg;
     }
 };
@@ -271,7 +286,7 @@ expect(chain().negator.returnsArg(true)).to.be(false);</code></pre></dd>
         <dt>may be arbitrarily nested</dt>
         <dd><pre><code>// Defining a `returnsArg` node (will be used mutiple times in langSpec)
 var argReturningNode = function(arg){
-    this._breaksChain()
+    this._link.breaks.chain()
     return arg;
 }
 
@@ -306,19 +321,19 @@ expect(chain().negator.negator.returnsArg(true)).to.be(true);</code></pre></dd>
     <section class="suite">
       <h1>Any method in the language spec</h1>
       <dl>
-        <dt>may call `this.linksTo` to return a descendant node of the chain object instead of the root</dt>
+        <dt>may call `this._link.binds.to` to return an object than the root of the chain object instead of the root</dt>
         <dd><pre><code>var rangeSpec = {
     from: function(num){
         this._data.from = num;
 
-        // From `_linksTo` itself to expose its children
+        // `this._link.binds.to` itself to expose its children
         // as the next possible calls in the chain
-        this._linksTo('from');
+        this._link.binds.to(this.from);
     }
 };
 
 rangeSpec.from.to = function(num){
-    this._breaksChain();
+    this._link.breaks.chain();
 
     var result = [];
     for(i = this._data.from; i &lt;= num; ++i){
