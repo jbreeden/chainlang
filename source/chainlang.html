@@ -399,26 +399,7 @@ essentially &quot;proxied&quot; versions of the methods found on the language ob
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">createChainableProxyNode</span><span class="params">(node, chain, language)</span>{</span>
-        Object.keys(language).forEach(<span class="keyword">function</span>(key){</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-21">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
-              </div>
-              <p>Properties named with a leading underscore are reserved for chain-level
-semi-hidden data to avoid conflicts with language methods. So, for now
-we&#39;ll just ignore any we come across. May want to throw an error later.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(key[<span class="number">0</span>] == <span class="string">"_"</span>){
-                <span class="keyword">return</span>;
-            }
+        Object.keys(language).forEach(<span class="keyword">function</span>(key){
 
             <span class="keyword">var</span> prop = language[key];
             <span class="keyword">if</span>(prop === <span class="literal">undefined</span> || prop === <span class="literal">null</span>){
@@ -454,11 +435,11 @@ we&#39;ll just ignore any we come across. May want to throw an error later.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Returns <code>chain.__return__</code> if <code>chain.__break__</code> is set,
 or <code>chain.__nextLink__</code> if it is set, or else returns

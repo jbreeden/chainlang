@@ -89,7 +89,7 @@ library with a fluent API using chainlang.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> phrase = chainlang.append.bind(fromSpec);</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> define = chainlang.append.bind(fromSpec);</pre></div></div>
             
         </li>
         
@@ -107,7 +107,7 @@ from(array).take(count);
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTake</span><span class="params">(count)</span>{</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'take'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTake</span><span class="params">(count)</span>{</span>
     <span class="comment">/* `take` method breaks the chain and returns its own return value */</span>
     <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> take(<span class="keyword">this</span>._subject, count);
@@ -129,7 +129,7 @@ from(array).take.all();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take.all'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeAll</span><span class="params">()</span>{</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'take.all'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeAll</span><span class="params">()</span>{</span>
     <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> <span class="keyword">this</span>._subject;
 });</pre></div></div>
@@ -150,7 +150,7 @@ from(array).take.first();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take.first'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeFirst</span><span class="params">()</span>{</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'take.first'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeFirst</span><span class="params">()</span>{</span>
     <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> takeFirst(<span class="keyword">this</span>._subject);
 });</pre></div></div>
@@ -171,7 +171,7 @@ from(array).take.last();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take.last'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeLast</span><span class="params">()</span>{</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'take.last'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeLast</span><span class="params">()</span>{</span>
     <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> takeLast(<span class="keyword">this</span>._subject);
 });</pre></div></div>
@@ -192,7 +192,7 @@ from(array).where(cond).take.all();
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'where'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromWhere</span><span class="params">(cond)</span>{</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'where'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromWhere</span><span class="params">(cond)</span>{</span>
     <span class="keyword">this</span>._subject = <span class="keyword">this</span>._subject.filter(cond);
 });</pre></div></div>
             
@@ -221,7 +221,7 @@ from(array)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'select'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromSelect</span><span class="params">(projector)</span> {</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'select'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromSelect</span><span class="params">(projector)</span> {</span>
     <span class="keyword">this</span>._subject = select(<span class="keyword">this</span>._subject, projector);
 });</pre></div></div>
             
@@ -246,7 +246,7 @@ from(array1)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'union'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromUnion</span><span class="params">()</span> {</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'union'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromUnion</span><span class="params">()</span> {</span>
     <span class="keyword">var</span> args = Array.prototype.slice.call(arguments);
     args.unshift(<span class="keyword">this</span>._subject);
     <span class="keyword">this</span>._subject = union.apply(<span class="literal">null</span>, args);
@@ -272,14 +272,10 @@ from(array1)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'left.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromLeftJoin</span><span class="params">(right)</span> {</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'left.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromLeftJoin</span><span class="params">(right)</span> {</span>
     <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">this</span>._data.joinType = <span class="string">'left'</span>;
-    <span class="keyword">this</span>._data.right = right;
-    
-    <span class="keyword">return</span> {
-        on: on.bind(<span class="keyword">this</span>)
-    }
+    <span class="keyword">return</span> <span class="keyword">this</span>._private.join(right);
 });</pre></div></div>
             
         </li>
@@ -302,14 +298,10 @@ from(array1)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'right.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromRightJoin</span><span class="params">(right)</span> {</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'right.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromRightJoin</span><span class="params">(right)</span> {</span>
     <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">this</span>._data.joinType = <span class="string">'right'</span>;
-    <span class="keyword">this</span>._data.right = right;
-    
-    <span class="keyword">return</span> {
-        on: on.bind(<span class="keyword">this</span>)  
-    }
+    <span class="keyword">return</span> <span class="keyword">this</span>._private.join(right);
 });</pre></div></div>
             
         </li>
@@ -332,26 +324,11 @@ from(array1)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromJoinOn</span><span class="params">(right)</span>{</span>
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromJoinOn</span><span class="params">(right)</span>{</span>
     <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">this</span>._data.joinType = <span class="string">'inner'</span>;
-    <span class="keyword">this</span>._data.right = right;
-    
-    <span class="keyword">return</span> {
-        on: on.bind(<span class="keyword">this</span>)  
-    }
-});
-
-<span class="function"><span class="keyword">function</span> <span class="title">on</span><span class="params">(key)</span>{</span>
-    <span class="keyword">this</span>._subject = join(
-        <span class="keyword">this</span>._subject, 
-        <span class="keyword">this</span>._data.right, 
-        <span class="keyword">this</span>._data.joinType, 
-        key,
-        <span class="literal">false</span>);
-    
-    <span class="keyword">return</span> <span class="keyword">this</span>;
-}</pre></div></div>
+    <span class="keyword">return</span> <span class="keyword">this</span>._private.join(right);
+});</pre></div></div>
             
         </li>
         
@@ -361,6 +338,58 @@ from(array1)
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Using a private function to encapsulate the common
+operations for all join types</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'_private.join'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(right)</span> {</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">this</span>._data.right = right;
+    <span class="keyword">return</span> <span class="keyword">this</span>._private.nodes.on;
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Private node <code>on</code> exposes only an <code>on</code> method. <br/>
+*NOTE: Returning private nodes allows you to hide or
+ expose different methods at different places in the call chain.
+ We would not, for example, want to expose the <code>on</code> method at
+ the root of the fluent api because a call like <code>from(array).on(...)</code>
+ would not make sense. So, we only return the prive <code>on</code> node after
+ an invocation of some <code>join</code> method, as in <code>from(a).left.join(b).on(...)</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>define(<span class="string">'_private.nodes.on'</span>,{
+    on: <span class="function"><span class="keyword">function</span> <span class="params">(key)</span>{</span>
+        <span class="keyword">this</span>._subject = join(
+            <span class="keyword">this</span>._subject, 
+            <span class="keyword">this</span>._data.right, 
+            <span class="keyword">this</span>._data.joinType, 
+            key,
+            <span class="literal">false</span>);
+        
+        <span class="keyword">return</span> <span class="keyword">this</span>;
+    }
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>fromSpec now has this structure: <br/></p>
 <pre>
@@ -374,7 +403,8 @@ from(array1)
  union: [Function: fromUnion],
  left: { join: [Function: fromLeftJoin] },
  right: { join: [Function: fromRightJoin] },
- join: [Function: fromJoinOn] }
+ join: [Function: fromJoinOn],
+ _private: { join: [Function], nodes: { on: [Object] } } }
 </pre>
 
 <h2>Standard Api</h2>
@@ -384,11 +414,11 @@ from(array1)
         </li>
         
         
-        <li id="section-17">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p><em>NOTE: It is generally a good idea to define your logic
 separately from your fluent api</em></p>
@@ -399,11 +429,11 @@ separately from your fluent api</em></p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p><strong>take</strong> takes the first <code>count</code> elements from <code>collection</code></p>
 
@@ -422,11 +452,11 @@ separately from your fluent api</em></p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p><strong>takeFirst</strong> returns the first element of <code>collection</code></p>
 
@@ -442,11 +472,11 @@ separately from your fluent api</em></p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p><strong>takeLast</strong> returns the last element of <code>collection</code></p>
 
@@ -462,11 +492,11 @@ separately from your fluent api</em></p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p><strong>select</strong> accepts either a list of property
 names to project for each element, or a mapping
@@ -503,11 +533,11 @@ element in the array.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p><strong>union</strong> accepts a variable number of arrays and returns
 an array with all elements from all array argument supplied</p>
@@ -530,11 +560,11 @@ an array with all elements from all array argument supplied</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p><strong>join</strong> joins <code>left</code> and <code>right</code> arrays with a join type
 of either &#39;left&#39;, &#39;right&#39;, or &#39;inner&#39; defined by <code>joinType</code>,
@@ -563,7 +593,7 @@ on the <code>key</code> field.</p>
         inner = left;
         innerPrefix = <span class="string">'left'</span>
     }  <span class="keyword">else</span> {
-        <span class="keyword">throw</span> <span class="string">'invalid join type'</span>;
+        <span class="keyword">throw</span> <span class="string">'invalid join type: '</span> + joinType;
     }
 
     <span class="keyword">var</span> compare = isStrict ? strictCompare : looseCompare;
