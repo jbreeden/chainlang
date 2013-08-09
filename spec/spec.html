@@ -91,55 +91,37 @@ expect(allFieldsOfFirstAppearInSecond(stubLang, chainConstructor())).to.be(true)
       <dl>
         <dt>Implicitly returns itself from all decendant methods</dt>
         <dd><pre><code>var chain = chainlang.create({
-    returnsScalar: function(){
-        return 1;
+    returnsNothing: function(){
+        return;
     },
     levelTwo: {
-        returnsScalar: function(){
-            return 2;
+        returnsNothing: function(){
+            return;
         }
     }
 });
 
 expect(
-    chain().returnsScalar()
+    chain().returnsNothing()
 ).to.eql(
     chain()
 );
 
 expect(
-    chain().levelTwo.returnsScalar()
+    chain().levelTwo.returnsNothing()
 ).to.eql(
     chain()
 );</code></pre></dd>
-        <dt>contains a &quot;this._link.breaks.chain&quot; method that prevents the implicit return of the chain object</dt>
+        <dt>Will return any explicit return value instead of returning itself implicitly</dt>
         <dd><pre><code>var chain = chainlang.create({
-    iBreakTheChain: function(){
-        this._link.breaks.chain();
-        return 'some scalar';
+    returnsSomething: function(){
+        return 'something';
     }
 });
 
 expect(
-    chain().iBreakTheChain()
-).to.eql(&quot;some scalar&quot;)</code></pre></dd>
-        <dt>contains a &quot;_prev&quot; property that always contains the return value of the last function in the chain</dt>
-        <dd><pre><code>var chain = chainlang.create(
-    {
-        returnsOne: function(){ return 1; },
-        returnsTwo: function(){ return 2; },
-        breaksAndReturnsPrev: function(){
-            this._link.breaks.chain();
-            return this._prev;
-        }
-    });
-
-expect(
-    chain().returnsOne().breaksAndReturnsPrev()
-).to.be(1);
-expect(
-    chain().returnsTwo().breaksAndReturnsPrev()
-).to.be(2);</code></pre></dd>
+    chain().returnsSomething()
+).to.eql(&quot;something&quot;)</code></pre></dd>
         <dt>contains a &quot;_data&quot; property which can be used to pass data through the chain and is initially empty</dt>
         <dd><pre><code>var link = chainlang.create({})();
 expect(link).to.have.key('_data');
@@ -154,7 +136,6 @@ expect(hasOwnKey).to.be(false);</code></pre></dd>
         <dt>contains a &quot;_subject&quot; property, which references the optional parameter to the chain function</dt>
         <dd><pre><code>var chain = chainlang.create({
     getSubject: function(){
-        this._link.breaks.chain();
         return this._subject;
     }
 });
@@ -167,36 +148,36 @@ expect(
         <dt>allows chaining of methods arbitrarily nested within properties of the language</dt>
         <dd><pre><code>var chain = chainlang.create(
     {
-        topLevelFn : function(){
-            return 1;
+        addOne : function(){
+            this._subject = this._subject + 1;
         },
         secondLevel : {
-            fn : function (){
-                return this._prev + 1;
+            addOne : function (){
+                this._subject = this._subject + 1;
             },
             thirdLevel : {
-                fn : function(){
-                    return this._prev + 1;
+                addOne : function(){
+                    this._subject = this._subject + 1;
                 }
             }                    
         }
     });
 
 expect(
-    chain().topLevelFn()._prev
-).to.be(1);
-
-expect(
-    chain().topLevelFn().secondLevel.fn()._prev
+    chain(1).addOne()._subject
 ).to.be(2);
 
 expect(
-    chain().topLevelFn().secondLevel.thirdLevel.fn()._prev
-).to.be(2);
+    chain(1).addOne().secondLevel.addOne()._subject
+).to.be(3);
 
 expect(
-    chain().topLevelFn().secondLevel.fn().secondLevel.thirdLevel.fn()._prev
-).to.be(3);</code></pre></dd>
+    chain(1).addOne().secondLevel.thirdLevel.addOne()._subject
+).to.be(3);
+
+expect(
+    chain(1).addOne().secondLevel.addOne().secondLevel.thirdLevel.addOne()._subject
+).to.be(4);</code></pre></dd>
         <dt>is bound to &quot;this&quot; for every method call in the chain, even for methods of child objects</dt>
         <dd><pre><code>var spy = sinon.spy();
 
@@ -236,7 +217,7 @@ expect(chain()._data).to.be.eql({});</code></pre></dd>
 });
 
 expect(
-    chain().setsData().doesNothing().readsAndReturnsData()._prev
+    chain().setsData().doesNothing().readsAndReturnsData()
 ).to.be(1);</code></pre></dd>
       </dl>
     </section>
@@ -249,7 +230,6 @@ expect(
 var chainSpec = {};
 chainSpec.prop = spy; /* spy is a function, so prop is a method */
 chainSpec.prop.methodsStillAvailable = function(){
-    this._link.breaks.chain();
     return true;
 }
 
@@ -259,40 +239,6 @@ chain().prop();
 
 expect(spy.called).to.be(true);
 expect(chain().prop.methodsStillAvailable()).to.be(true);</code></pre></dd>
-      </dl>
-    </section>
-    <section class="suite">
-      <h1>Any method in the language spec</h1>
-      <dl>
-        <dt>may call `this._link.binds.to` to return an object than the root of the chain object instead of the root</dt>
-        <dd><pre><code>var rangeSpec = {
-    from: function(num){
-        this._data.from = num;
-
-        // `this._link.binds.to` itself to expose its children
-        // as the next possible calls in the chain
-        this._link.binds.to(this.from);
-    }
-};
-
-rangeSpec.from.to = function(num){
-    this._link.breaks.chain();
-
-    var result = [];
-    for(i = this._data.from; i &lt;= num; ++i){
-        result.push(i);
-    }
-
-    return result;
-}
-
-var range = chainlang.create(rangeSpec);
-
-expect(
-    range().from(2).to(7)
-).to.eql(
-    [2, 3, 4, 5, 6, 7]
-);</code></pre></dd>
       </dl>
     </section>
 

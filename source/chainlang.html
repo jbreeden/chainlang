@@ -264,15 +264,7 @@ interleaved with other chain expressions of the same language.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> theChain = createChainableProxy(lang);
-        
-        chainlang.append(theChain, <span class="string">'_link.breaks.chain'</span>, <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
-            theChain.__break__ = <span class="literal">true</span>;
-        });
-        
-        chainlang.append(theChain, <span class="string">'_link.binds.to'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(nextLink)</span> {</span>
-            theChain.__nextLink__ = nextLink;
-        });</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">var</span> theChain = createChainableProxy(lang);</pre></div></div>
             
         </li>
         
@@ -323,9 +315,6 @@ of the new <code>chainlang</code> type.
             
             <div class="content"><div class='highlight'><pre>            theChain._subject = obj;
             theChain._data = {};
-            theChain._prev = <span class="literal">null</span>;
-            theChain.__nextLink__ = <span class="literal">undefined</span>;
-            theChain.__break__ = <span class="literal">false</span>;
             
             <span class="keyword">return</span> theChain;
         }</pre></div></div>
@@ -344,7 +333,7 @@ of the new <code>chainlang</code> type.
             </div>
             
             <div class="content"><div class='highlight'><pre>        <span class="keyword">return</span> chain;
-    }</pre></div></div>
+    };</pre></div></div>
             
         </li>
         
@@ -383,7 +372,7 @@ essentially &quot;proxied&quot; versions of the methods found on the language ob
             language);
 
         <span class="keyword">return</span> chain;
-    };</pre></div></div>
+    }</pre></div></div>
             
         </li>
         
@@ -425,12 +414,7 @@ essentially &quot;proxied&quot; versions of the methods found on the language ob
             proxiedMethod;
 
         proxiedMethod = <span class="keyword">function</span>(){
-            chain._prev = fn.apply(chain, arguments);
-            <span class="keyword">return</span> returnValue(chain);
-        }
-
-        <span class="keyword">return</span> proxiedMethod;
-    }</pre></div></div>
+            <span class="keyword">var</span> result = fn.apply(chain, arguments);</pre></div></div>
             
         </li>
         
@@ -441,23 +425,14 @@ essentially &quot;proxied&quot; versions of the methods found on the language ob
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
-              <p>Returns <code>chain.__return__</code> if <code>chain.__break__</code> is set,
-or <code>chain.__nextLink__</code> if it is set, or else returns
-the chain.</p>
+              <p>Any explicit return will prevent the implicit return of the chain</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">returnValue</span><span class="params">(chain)</span>{</span>
-        <span class="keyword">if</span> (chain.__break__) {
-            <span class="keyword">return</span> chain._prev;
-        }
-        <span class="keyword">if</span> (<span class="literal">undefined</span> != chain.__nextLink__) {
-            <span class="keyword">var</span> nextLink = chain.__nextLink__;
-            chain.__nextLink__ = <span class="literal">undefined</span>;
-            <span class="keyword">return</span> nextLink;
-        }
-        
-        <span class="keyword">return</span> chain;
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">return</span> (<span class="literal">undefined</span> === result) ? chain : result;
+        };
+
+        <span class="keyword">return</span> proxiedMethod;
     }
 }());</pre></div></div>
             

@@ -109,7 +109,6 @@ from(array).take(count);
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'take'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTake</span><span class="params">(count)</span>{</span>
     <span class="comment">/* `take` method breaks the chain and returns its own return value */</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> take(<span class="keyword">this</span>._subject, count);
 });</pre></div></div>
             
@@ -130,7 +129,6 @@ from(array).take.all();
             </div>
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'take.all'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeAll</span><span class="params">()</span>{</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> <span class="keyword">this</span>._subject;
 });</pre></div></div>
             
@@ -151,7 +149,6 @@ from(array).take.first();
             </div>
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'take.first'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeFirst</span><span class="params">()</span>{</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> takeFirst(<span class="keyword">this</span>._subject);
 });</pre></div></div>
             
@@ -172,7 +169,6 @@ from(array).take.last();
             </div>
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'take.last'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeLast</span><span class="params">()</span>{</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">return</span> takeLast(<span class="keyword">this</span>._subject);
 });</pre></div></div>
             
@@ -342,7 +338,6 @@ operations for all join types</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'_private.join'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(right)</span> {</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">this</span>._data.right = right;
     <span class="keyword">return</span> <span class="keyword">this</span>._private.nodes.on;
 });</pre></div></div>
