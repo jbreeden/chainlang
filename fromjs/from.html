@@ -273,7 +273,6 @@ from(array1)
             </div>
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'left.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromLeftJoin</span><span class="params">(right)</span> {</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">this</span>._data.joinType = <span class="string">'left'</span>;
     <span class="keyword">return</span> <span class="keyword">this</span>._private.join(right);
 });</pre></div></div>
@@ -299,7 +298,6 @@ from(array1)
             </div>
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'right.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromRightJoin</span><span class="params">(right)</span> {</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">this</span>._data.joinType = <span class="string">'right'</span>;
     <span class="keyword">return</span> <span class="keyword">this</span>._private.join(right);
 });</pre></div></div>
@@ -325,7 +323,6 @@ from(array1)
             </div>
             
             <div class="content"><div class='highlight'><pre>define(<span class="string">'join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromJoinOn</span><span class="params">(right)</span>{</span>
-    <span class="keyword">this</span>._link.breaks.chain();
     <span class="keyword">this</span>._data.joinType = <span class="string">'inner'</span>;
     <span class="keyword">return</span> <span class="keyword">this</span>._private.join(right);
 });</pre></div></div>
@@ -360,12 +357,12 @@ operations for all join types</p>
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Private node <code>on</code> exposes only an <code>on</code> method. <br/>
-*NOTE: Returning private nodes allows you to hide or
+<em>NOTE: Returning private nodes allows you to hide or
  expose different methods at different places in the call chain.
  We would not, for example, want to expose the <code>on</code> method at
  the root of the fluent api because a call like <code>from(array).on(...)</code>
- would not make sense. So, we only return the prive <code>on</code> node after
- an invocation of some <code>join</code> method, as in <code>from(a).left.join(b).on(...)</code></p>
+ would not make sense. So, we only return the private <code>on</code> node after
+ an invocation of some <code>join</code> method, as in <code>from(a).left.join(b).on(...)</code></em></p>
 
             </div>
             
