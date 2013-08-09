@@ -27,7 +27,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>In this walkthrough, we&#39;ll be creating a full-fledged <code>from</code>
+              <p>In this example, we&#39;ll be creating a full-fledged <code>from</code>
 library with a fluent API using chainlang.</p>
 <hr>
 
@@ -54,14 +54,12 @@ library with a fluent API using chainlang.</p>
         <li id="section-3">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Declaring our <code>fromSpec</code> obect</p>
+              <h2>Fluent API creation</h2>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> fromSpec = {};</pre></div></div>
             
         </li>
         
@@ -72,26 +70,11 @@ library with a fluent API using chainlang.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p><strong>take</strong> returns either <code>count</code> elements of <code>_subject</code>,
-or <code>_subject.length</code> elements, whichever is lower.  </p>
-<pre>
-from(array).take(count);
-</pre>
+              <p>Declaring our <code>fromSpec</code> obect</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take = <span class="function"><span class="keyword">function</span> <span class="title">take</span><span class="params">(count)</span>{</span>
-    <span class="comment">/* `take` method breaks the chain and returns its own return value */</span>
-    <span class="keyword">this</span>._breaksChain();
-
-    <span class="keyword">var</span> result = [];
-    <span class="comment">/* this._subject is initialized with the argument to from(...) */</span>
-    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._subject.length &amp;&amp; i &lt; count; ++i){
-        result.push(<span class="keyword">this</span>._subject[i]);
-    }
-    
-    <span class="keyword">return</span> result;
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> fromSpec = {};</pre></div></div>
             
         </li>
         
@@ -102,17 +85,11 @@ from(array).take(count);
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p><strong>take.all</strong> returns all of the elements of <code>_subject</code></p>
-<pre>
-from(array).take.all();
-</pre>
+              <p>Binding an <code>append</code> method for phrase declaration</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take.all = <span class="function"><span class="keyword">function</span> <span class="title">all</span><span class="params">()</span>{</span>
-    <span class="keyword">this</span>._breaksChain();
-    <span class="keyword">return</span> <span class="keyword">this</span>._subject;
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> phrase = chainlang.append.bind(fromSpec);</pre></div></div>
             
         </li>
         
@@ -123,21 +100,18 @@ from(array).take.all();
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p><strong>take.first</strong> returns the first element of <code>_subject</code></p>
+              <p><strong>take</strong> <br/></p>
 <pre>
-from(array).take.first();
+from(array).take(count);
 </pre>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take.first = <span class="function"><span class="keyword">function</span> <span class="title">first</span><span class="params">()</span>{</span>
-    <span class="keyword">this</span>._breaksChain();
-    
-    <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
-        <span class="keyword">return</span>;
-    }
-    <span class="keyword">return</span> <span class="keyword">this</span>._subject[<span class="number">0</span>];
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTake</span><span class="params">(count)</span>{</span>
+    <span class="comment">/* `take` method breaks the chain and returns its own return value */</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">return</span> take(<span class="keyword">this</span>._subject, count);
+});</pre></div></div>
             
         </li>
         
@@ -148,21 +122,17 @@ from(array).take.first();
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p><strong>take.last</strong> returns the last element of <code>_subject</code></p>
+              <p><strong>take.all</strong> <br/></p>
 <pre>
-from(array).take.last();
+from(array).take.all();
 </pre>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.take.last = <span class="function"><span class="keyword">function</span> <span class="title">last</span><span class="params">()</span>{</span>
-    <span class="keyword">this</span>._breaksChain();
-    
-    <span class="keyword">if</span>(!(<span class="keyword">this</span>._subject.length &gt;= <span class="number">1</span>)){
-        <span class="keyword">return</span>;
-    }
-    <span class="keyword">return</span> <span class="keyword">this</span>._subject[<span class="keyword">this</span>._subject.length - <span class="number">1</span>];
-}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take.all'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeAll</span><span class="params">()</span>{</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">return</span> <span class="keyword">this</span>._subject;
+});</pre></div></div>
             
         </li>
         
@@ -173,17 +143,17 @@ from(array).take.last();
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p><strong>where</strong> accepts a function, <code>cond</code>, and uses it to
-filter the <code>_subject</code> array</p>
+              <p><strong>take.first</strong> <br/></p>
 <pre>
-from(array).where(cond).take.all();
+from(array).take.first();
 </pre>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.where = <span class="function"><span class="keyword">function</span> <span class="title">where</span><span class="params">(cond)</span>{</span>
-    <span class="keyword">this</span>._subject = <span class="keyword">this</span>._subject.filter(cond);
-};</pre></div></div>
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take.first'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeFirst</span><span class="params">()</span>{</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">return</span> takeFirst(<span class="keyword">this</span>._subject);
+});</pre></div></div>
             
         </li>
         
@@ -194,10 +164,48 @@ from(array).where(cond).take.all();
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p><strong>select</strong> accepts either a list of property
-names to project for each element, or a mapping
-function, <code>projector</code>, used to transform each
-element in the array.  </p>
+              <p><strong>take.last</strong> <br/></p>
+<pre>
+from(array).take.last();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'take.last'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromTakeLast</span><span class="params">()</span>{</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">return</span> takeLast(<span class="keyword">this</span>._subject);
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p><strong>where</strong> <br/></p>
+<pre>
+from(array).where(cond).take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'where'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromWhere</span><span class="params">(cond)</span>{</span>
+    <span class="keyword">this</span>._subject = <span class="keyword">this</span>._subject.filter(cond);
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p><strong>select</strong> <br/></p>
 <pre>
 from(array).select("name", "id").take.all();
 from(array).select(projectoreFn).take.all();
@@ -213,16 +221,241 @@ from(array)
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.select = <span class="function"><span class="keyword">function</span> <span class="title">select</span><span class="params">(projector)</span>{</span>
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'select'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromSelect</span><span class="params">(projector)</span> {</span>
+    <span class="keyword">this</span>._subject = select(<span class="keyword">this</span>._subject, projector);
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p><strong>union</strong> <br/></p>
+<pre>
+/* Getting all objects of array1, array2[, array3]...
+   with id == 2 */
+from(array1)
+    .union(array2[, array3]...)
+    .where(function(el){ return el.id == 2; })
+    .take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'union'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromUnion</span><span class="params">()</span> {</span>
+    <span class="keyword">var</span> args = Array.prototype.slice.call(arguments);
+    args.unshift(<span class="keyword">this</span>._subject);
+    <span class="keyword">this</span>._subject = union.apply(<span class="literal">null</span>, args);
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p><strong>left.join</strong> <br/></p>
+<pre>
+/* left join two collections on some field */
+from(array1)
+    .left.join(array2)
+    .on('fieldName')
+    .take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'left.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromLeftJoin</span><span class="params">(right)</span> {</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">this</span>._data.joinType = <span class="string">'left'</span>;
+    <span class="keyword">this</span>._data.right = right;
+    
+    <span class="keyword">return</span> {
+        on: on.bind(<span class="keyword">this</span>)
+    }
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p><strong>right.join</strong> <br/></p>
+<pre>
+/* right join two collections on some field */
+from(array1)
+    .right.join(array2)
+    .on('fieldName')
+    .take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'right.join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromRightJoin</span><span class="params">(right)</span> {</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">this</span>._data.joinType = <span class="string">'right'</span>;
+    <span class="keyword">this</span>._data.right = right;
+    
+    <span class="keyword">return</span> {
+        on: on.bind(<span class="keyword">this</span>)  
+    }
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p><strong>join</strong> <br/></p>
+<pre>
+/* inner join two collections on some field */
+from(array1)
+    .join(array2)
+    .on('fieldName')
+    .take.all();
+</pre>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>phrase(<span class="string">'join'</span>, <span class="function"><span class="keyword">function</span> <span class="title">fromJoinOn</span><span class="params">(right)</span>{</span>
+    <span class="keyword">this</span>._link.breaks.chain();
+    <span class="keyword">this</span>._data.joinType = <span class="string">'inner'</span>;
+    <span class="keyword">this</span>._data.right = right;
+    
+    <span class="keyword">return</span> {
+        on: on.bind(<span class="keyword">this</span>)  
+    }
+});
+
+<span class="function"><span class="keyword">function</span> <span class="title">on</span><span class="params">(key)</span>{</span>
+    <span class="keyword">this</span>._subject = join(
+        <span class="keyword">this</span>._subject, 
+        <span class="keyword">this</span>._data.right, 
+        <span class="keyword">this</span>._data.joinType, 
+        key,
+        <span class="literal">false</span>);
+    
+    <span class="keyword">return</span> <span class="keyword">this</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <h2>Standard Api</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p><strong>take</strong> takes the first <code>count</code> elements from <code>collection</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">take</span><span class="params">(collection, count)</span>{</span>
+    <span class="keyword">var</span> result = [];
+    
+    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; collection.length &amp;&amp; i &lt; count; ++i){
+        result.push(collection[i]);
+    }
+    
+    <span class="keyword">return</span> result;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p><strong>takeFirst</strong> returns the first element of <code>collection</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">takeFirst</span><span class="params">(collection)</span>{</span>
+    <span class="keyword">if</span>(!(collection.length &gt;= <span class="number">1</span>)){
+        <span class="keyword">return</span>;
+    }
+    <span class="keyword">return</span> collection[<span class="number">0</span>];
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p><strong>takeLast</strong> returns the last element of <code>collection</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">takeLast</span><span class="params">(collection)</span>{</span>
+    <span class="keyword">if</span>(!(collection.length &gt;= <span class="number">1</span>)){
+        <span class="keyword">return</span>;
+    }
+    <span class="keyword">return</span> collection[collection.length - <span class="number">1</span>];
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p><strong>select</strong> accepts either a list of property
+names to project for each element, or a mapping
+function, <code>projector</code>, used to transform each
+element in the array.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">select</span><span class="params">(collection, projector)</span>{</span>
+    <span class="keyword">var</span> keys = Array.prototype.slice.call(arguments, <span class="number">1</span>);
     <span class="keyword">if</span>(<span class="keyword">typeof</span> projector !== <span class="string">"function"</span>){
-        projector = makeProjectorForKeys.apply(<span class="literal">null</span>, arguments);
+        projector = makeProjectorForKeys.apply(<span class="literal">null</span>, keys);
     }
 
     <span class="keyword">var</span> result = [];
-    <span class="keyword">this</span>._subject.forEach(<span class="keyword">function</span>(el){
+    collection.forEach(<span class="keyword">function</span>(el){
         result.push(projector(el))
     });
-    <span class="keyword">this</span>._subject = result;
+    <span class="keyword">return</span> result;
 };
 
 <span class="function"><span class="keyword">function</span> <span class="title">makeProjectorForKeys</span><span class="params">()</span>{</span>
@@ -240,225 +473,64 @@ from(array)
         </li>
         
         
-        <li id="section-10">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
-              <p><strong>union</strong> accepts a variable number of arrays, and appends each element
-of each array onto this._subject</p>
-<pre>
-/* Getting all objects of array1, array2[, array3]...
-   with id == 2 */
-from(array1)
-    .union(array2[, array3]...)
-    .where(function(el){ return el.id == 2; })
-    .take.all();
-</pre>
+              <p><strong>union</strong> accepts a variable number of arrays and returns
+an array with all elements from all array argument supplied</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.union = <span class="function"><span class="keyword">function</span> <span class="title">union</span><span class="params">()</span>{</span>
-    <span class="keyword">for</span>(<span class="keyword">var</span> arg = <span class="number">0</span>; arg &lt; arguments.length; ++arg){
-        <span class="keyword">for</span>(<span class="keyword">var</span> el = <span class="number">0</span>; el &lt; arguments[arg].length; ++el){
-            <span class="keyword">this</span>._subject.push(arguments[arg][el]);
-        }
-    }
-};</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-11">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
-              </div>
-              <p><strong>join</strong> performs a join of current <code>_subject</code> and <code>right</code> param.
-Join may be inner (the default), left, or right (see below). Note:
-you must call <a href="#on">on</a> with some key to perform the join.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>fromSpec.join = <span class="function"><span class="keyword">function</span> <span class="title">join</span><span class="params">(right)</span>{</span>
-    <span class="keyword">this</span>._data.left = <span class="keyword">this</span>._subject;
-    <span class="keyword">this</span>._data.right = right;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">union</span><span class="params">()</span>{</span>
+    <span class="keyword">var</span> result = [];
+    <span class="keyword">var</span> args = Array.prototype.slice.call(arguments);
+    debugger;
+    args.forEach(<span class="keyword">function</span>(arg){
+        arg.forEach(<span class="keyword">function</span>(el){
+            result.push(el);   
+        })
+    });
     
-    <span class="keyword">if</span>(!<span class="keyword">this</span>._data.joinType){</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-12">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
-              </div>
-              <p>Default to inner join (just as with SQL)</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>._data.joinType = <span class="string">'inner'</span>;
-    }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-13">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
-              </div>
-              <p>Only want to expose children of join as the next possible
-methods in the chain. (Every &#39;join&#39; must be followed by an &#39;on&#39;)</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="keyword">this</span>._linksTo(<span class="string">"join"</span>);
-}</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-14">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-              <h2>Join Wrappers</h2>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-              <p><strong>left</strong> is a wrapper for join that sets up a <code>joinType</code> variable.
-<code>joinType</code> tells the <code>on</code> method how to join two collections. In
- this case, we select a left join.<br>Ex.</p>
-<pre>
-from(array1).left.join(array2).on('id').take.all();
-from(array1).where(someCondIsTrue).left.join(array2).on('id').take(3);
-</pre>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>fromSpec.left = {
-    _wrapper: <span class="keyword">function</span>(called, args){
-        <span class="keyword">this</span>._data.joinType = <span class="string">'left'</span>;
-        called.apply(<span class="literal">null</span>, args);
-    },
-    join: fromSpec.join
+    <span class="keyword">return</span> result;
 };</pre></div></div>
             
         </li>
         
         
-        <li id="section-16">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
-              <p><strong>right</strong> is a wrapper for join that sets up a <code>joinType</code> variable.
-<code>joinType</code> tells the <code>on</code> method how to join two collections. In
- this case, we select a right join.<br>Ex.</p>
-<pre>
-from(array1).right.join(array2).on('id').take.all();
-from(array1).where(someCondIsTrue).right.join(array2).on('id').take(3);
-</pre>
+              <p><strong>join</strong> joins <code>left</code> and <code>right</code> arrays with a join type
+of either &#39;left&#39;, &#39;right&#39;, or &#39;inner&#39; defined by <code>joinType</code>,
+on the <code>key</code> field.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>fromSpec.right = {
-    _wrapper: <span class="keyword">function</span>(called, args){
-        <span class="keyword">this</span>._data.joinType = <span class="string">'right'</span>;
-        called.apply(<span class="literal">null</span>, args);
-    },
-    join: fromSpec.join
-};</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-17">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
-              </div>
-              <p><strong>inner</strong> is a wrapper for join that sets up a <code>joinType</code> variable.
-<code>joinType</code> tells the <code>on</code> method how to join two collections. In
- this case, we select a inner join. (Note: inner join is the default,
- so <code>from(array1).inner.join(array2).on(&#39;id&#39;)</code> is equivalent to
- <code>from(array1).join(array2).on(&#39;id&#39;)</code><br>Ex.</p>
-<pre>
-from(array1).left.join(array2).on('id').take.all();
-from(array1).where(someCondIsTrue).left.join(array2).on('id').take(3);
-</pre>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>fromSpec.inner = {
-    _wrapper: <span class="keyword">function</span>(called, args){
-        <span class="keyword">this</span>._data.joinType = <span class="string">'inner'</span>;
-        called.apply(<span class="literal">null</span>, args);
-    },
-    join: fromSpec.join
-}</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-18">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
-              </div>
-              <p><strong>on</strong> accepts a <code>key</code> to join elements on, and an optional <code>isStrict</code> flag.
-If <code>isStrict</code> is false, the default, then comparisons are made with <code>==</code>. Otherwise,
-comparisons are with <code>===</code>. The result of on is a collection of objects with
-<code>left</code> and <code>right</code> fields, containing the elements from the &quot;left&quot; and &quot;right&quot;
-collections that were matched on their <code>key</code> fields. Joins may be left, right, or inner.
-Ex.</p>
-<pre>
-from(array1).join(array2).on('id').take.all();
-from(array1).left.join(array2).on('val', true).take.first();
-</pre>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>fromSpec.join.on = <span class="function"><span class="keyword">function</span> <span class="title">on</span><span class="params">(key, isStrict)</span>{</span>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">join</span><span class="params">(left, right, joinType, key, isStrict)</span>{</span>
     <span class="keyword">var</span> outter,
         outterPrefix,
         inner,
         innerPrefix,
         result = [],
-        resultItem = {}
-        chain = <span class="keyword">this</span>;
+        resultItem = {};
 
-    <span class="keyword">if</span>(chain._data.joinType === <span class="string">'left'</span>
-        || chain._data.joinType === <span class="string">'inner'</span>){
-        outter = chain._data.left;
+    <span class="keyword">if</span>(joinType === <span class="string">'left'</span>
+        || joinType === <span class="string">'inner'</span>){
+        outter = left;
         outterPrefix = <span class="string">'left'</span>;
-        inner = chain._data.right;
+        inner = right;
         innerPrefix = <span class="string">'right'</span>
     }
-    <span class="keyword">else</span> <span class="keyword">if</span>(chain._data.joinType === <span class="string">'right'</span>){
-        outter = chain._data.right;
+    <span class="keyword">else</span> <span class="keyword">if</span>(joinType === <span class="string">'right'</span>){
+        outter = right;
         outterPrefix = <span class="string">'right'</span>;
-        inner = chain._data.left;
+        inner = left;
         innerPrefix = <span class="string">'left'</span>
     }  <span class="keyword">else</span> {
         <span class="keyword">throw</span> <span class="string">'invalid join type'</span>;
@@ -488,7 +560,7 @@ from(array1).left.join(array2).on('val', true).take.first();
             }
         })
         
-        <span class="keyword">if</span>(!matched &amp;&amp; !(chain._data.joinType === <span class="string">'inner'</span>)){
+        <span class="keyword">if</span>(!matched &amp;&amp; !(joinType === <span class="string">'inner'</span>)){
             resultItem = {};
             resultItem[outterPrefix] = {};
             resultItem[innerPrefix] = <span class="literal">null</span>;
@@ -499,7 +571,7 @@ from(array1).left.join(array2).on('val', true).take.first();
         }
     });
     
-    <span class="keyword">this</span>._subject = result;
+    <span class="keyword">return</span> result;
 };
 
 <span class="function"><span class="keyword">function</span> <span class="title">strictCompare</span><span class="params">(first, second)</span>{</span>
