@@ -143,12 +143,6 @@
     // This is the self-recursive method for construction of the chainable object
     function createChainableProxyNode(node, chain, language){
         Object.keys(language).forEach(function(key){
-            // Properties named with a leading underscore are reserved for chain-level
-            // semi-hidden data to avoid conflicts with language methods. So, for now
-            // we'll just ignore any we come across. May want to throw an error later.
-            if(key[0] == "_"){
-                return;
-            }
 
             var prop = language[key];
             if(prop === undefined || prop === null){

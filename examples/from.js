@@ -13,13 +13,13 @@ var chainlang = require('../chainlang');
 var fromSpec = {};
 
 // Binding an `append` method for phrase declaration
-var phrase = chainlang.append.bind(fromSpec);
+var define = chainlang.append.bind(fromSpec);
 
 // **take** <br/>
 // <pre>
 // from(array).take(count);
 //</pre>
-phrase('take', function fromTake(count){
+define('take', function fromTake(count){
     /* `take` method breaks the chain and returns its own return value */
     this._link.breaks.chain();
     return take(this._subject, count);
@@ -29,7 +29,7 @@ phrase('take', function fromTake(count){
 // <pre>
 // from(array).take.all();
 // </pre>
-phrase('take.all', function fromTakeAll(){
+define('take.all', function fromTakeAll(){
     this._link.breaks.chain();
     return this._subject;
 });
@@ -38,7 +38,7 @@ phrase('take.all', function fromTakeAll(){
 // <pre>
 // from(array).take.first();
 // </pre>
-phrase('take.first', function fromTakeFirst(){
+define('take.first', function fromTakeFirst(){
     this._link.breaks.chain();
     return takeFirst(this._subject);
 });
@@ -47,7 +47,7 @@ phrase('take.first', function fromTakeFirst(){
 // <pre>
 // from(array).take.last();
 // </pre>
-phrase('take.last', function fromTakeLast(){
+define('take.last', function fromTakeLast(){
     this._link.breaks.chain();
     return takeLast(this._subject);
 });
@@ -56,7 +56,7 @@ phrase('take.last', function fromTakeLast(){
 // <pre>
 // from(array).where(cond).take.all();
 // </pre>
-phrase('where', function fromWhere(cond){
+define('where', function fromWhere(cond){
     this._subject = this._subject.filter(cond);
 });
 
@@ -73,7 +73,7 @@ phrase('where', function fromWhere(cond){
 //     .where(function(el){ el != null; })
 //     .take.all();
 // </pre>
-phrase('select', function fromSelect(projector) {
+define('select', function fromSelect(projector) {
     this._subject = select(this._subject, projector);
 });
 
@@ -86,7 +86,7 @@ phrase('select', function fromSelect(projector) {
 //     .where(function(el){ return el.id == 2; })
 //     .take.all();
 // </pre>
-phrase('union', function fromUnion() {
+define('union', function fromUnion() {
     var args = Array.prototype.slice.call(arguments);
     args.unshift(this._subject);
     this._subject = union.apply(null, args);
@@ -100,14 +100,10 @@ phrase('union', function fromUnion() {
 //     .on('fieldName')
 //     .take.all();
 // </pre>
-phrase('left.join', function fromLeftJoin(right) {
+define('left.join', function fromLeftJoin(right) {
     this._link.breaks.chain();
     this._data.joinType = 'left';
-    this._data.right = right;
-    
-    return {
-        on: on.bind(this)
-    }
+    return this._private.join(right);
 });
 
 // **right.join** <br/>
@@ -118,14 +114,10 @@ phrase('left.join', function fromLeftJoin(right) {
 //     .on('fieldName')
 //     .take.all();
 // </pre>
-phrase('right.join', function fromRightJoin(right) {
+define('right.join', function fromRightJoin(right) {
     this._link.breaks.chain();
     this._data.joinType = 'right';
-    this._data.right = right;
-    
-    return {
-        on: on.bind(this)  
-    }
+    return this._private.join(right);
 });
 
 // **join** <br/>
@@ -136,26 +128,39 @@ phrase('right.join', function fromRightJoin(right) {
 //     .on('fieldName')
 //     .take.all();
 // </pre>
-phrase('join', function fromJoinOn(right){
+define('join', function fromJoinOn(right){
     this._link.breaks.chain();
     this._data.joinType = 'inner';
-    this._data.right = right;
-    
-    return {
-        on: on.bind(this)  
-    }
+    return this._private.join(right);
 });
 
-function on(key){
-    this._subject = join(
-        this._subject, 
-        this._data.right, 
-        this._data.joinType, 
-        key,
-        false);
-    
-    return this;
-}
+// Using a private function to encapsulate the common
+// operations for all join types
+define('_private.join', function (right) {
+    this._link.breaks.chain();
+    this._data.right = right;
+    return this._private.nodes.on;
+});
+
+// Private node `on` exposes only an `on` method. <br/>
+// *NOTE: Returning private nodes allows you to hide or
+//  expose different methods at different places in the call chain.
+//  We would not, for example, want to expose the `on` method at
+//  the root of the fluent api because a call like `from(array).on(...)`
+//  would not make sense. So, we only return the prive `on` node after
+//  an invocation of some `join` method, as in `from(a).left.join(b).on(...)`
+define('_private.nodes.on',{
+    on: function (key){
+        this._subject = join(
+            this._subject, 
+            this._data.right, 
+            this._data.joinType, 
+            key,
+            false);
+        
+        return this;
+    }
+});
 
 // fromSpec now has this structure: <br/>
 // <pre>
@@ -169,7 +174,8 @@ function on(key){
 //  union: [Function: fromUnion],
 //  left: { join: [Function: fromLeftJoin] },
 //  right: { join: [Function: fromRightJoin] },
-//  join: [Function: fromJoinOn] }
+//  join: [Function: fromJoinOn],
+//  _private: { join: [Function], nodes: { on: [Object] } } }
 // </pre>
 
 // Standard Api
@@ -275,7 +281,7 @@ function join(left, right, joinType, key, isStrict){
         inner = left;
         innerPrefix = 'left'
     }  else {
-        throw 'invalid join type';
+        throw 'invalid join type: ' + joinType;
     }
 
     var compare = isStrict ? strictCompare : looseCompare;
