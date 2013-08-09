@@ -98,8 +98,8 @@ Keeping Your Privates Hidden
 
 Sometimes it's desirable to hide some methods of your chainable api until it makes sense to use them.
 `chainlang` provides no built-in support for this, but it is recommended that you simply hide these nodes
-behind a field with a name like '_private'. That way, programmers using your api will be able to tell
-you did not intend those methods to be a part of the public interface. Also, keeping them *all* behind
+behind a field with a name like '_private'. That way, programmers using your api will not be tempted to use
+these methods in a context where it does not make sense to do so. Also, keeping them *all* behind
 a field like this, instand of simply prefixing them all with an '_' will prevent the auto-completion
 results from being cluttered with fields that are supposed to be private in the first place. For example:
 
@@ -109,6 +109,8 @@ var define = chainlang.append.bind(delaySpec);
 
 define('for', function(count){
     this._data.count = count;
+    
+    // exposing our private 'units' object now that we have a count
     return this._private.units;
 });
 
