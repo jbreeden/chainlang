@@ -1,4 +1,4 @@
-// In this walkthrough, we'll be creating a full-fledged `from`
+// In this example, we'll be creating a full-fledged `from`
 // library with a fluent API using chainlang.
 
 // ---
@@ -157,8 +157,28 @@ function on(key){
     return this;
 }
 
+// fromSpec now has this structure: <br/>
+// <pre>
+//{ take:
+//   { [Function: fromTake]
+//     all: [Function: fromTakeAll],
+//     first: [Function: fromTakeFirst],
+//     last: [Function: fromTakeLast] },
+//  where: [Function: fromWhere],
+//  select: [Function: fromSelect],
+//  union: [Function: fromUnion],
+//  left: { join: [Function: fromLeftJoin] },
+//  right: { join: [Function: fromRightJoin] },
+//  join: [Function: fromJoinOn] }
+// </pre>
+
 // Standard Api
 // ------------
+
+// *NOTE: It is generally a good idea to define your logic
+// separately from your fluent api*
+
+// ---
 
 // **take** takes the first `count` elements from `collection`
 function take(collection, count){
