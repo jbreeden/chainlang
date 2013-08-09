@@ -138,3 +138,10 @@ delay().for(5).minutes.then(function(){
 In the previous example, it would not make sense to have an expression such as `delay().minutes.then(...)`.
 The count needs to be declared before the units, so the units object is kept in private storage and exposed
 by `return`ing it from the `for(count)` call.
+
+More Information
+================
+
+* [The chainlang spec](http://jbreeden.github.io/chainlang/spec/spec.html)
+* [Example: Creating a full-feature fromjs library](http://jbreeden.github.io/chainlang/fromjs/from.html)
+* [Annotated source of chainlang.js](http://jbreeden.github.io/chainlang/source/chainlang.html)
