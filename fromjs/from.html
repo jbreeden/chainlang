@@ -359,10 +359,25 @@ from(array1)
         <li id="section-16">
             <div class="annotation">
               
-              <div class="pilwrap for-h2">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <h2>Standard Api</h2>
+              <p>fromSpec now has this structure: <br/></p>
+<pre>
+{ take:
+  { [Function: fromTake]
+    all: [Function: fromTakeAll],
+    first: [Function: fromTakeFirst],
+    last: [Function: fromTakeLast] },
+ where: [Function: fromWhere],
+ select: [Function: fromSelect],
+ union: [Function: fromUnion],
+ left: { join: [Function: fromLeftJoin] },
+ right: { join: [Function: fromRightJoin] },
+ join: [Function: fromJoinOn] }
+</pre>
+
+<h2>Standard Api</h2>
 
             </div>
             
@@ -374,6 +389,21 @@ from(array1)
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p><em>NOTE: It is generally a good idea to define your logic
+separately from your fluent api</em></p>
+<hr>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p><strong>take</strong> takes the first <code>count</code> elements from <code>collection</code></p>
 
@@ -392,11 +422,11 @@ from(array1)
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p><strong>takeFirst</strong> returns the first element of <code>collection</code></p>
 
@@ -412,11 +442,11 @@ from(array1)
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p><strong>takeLast</strong> returns the last element of <code>collection</code></p>
 
@@ -432,11 +462,11 @@ from(array1)
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p><strong>select</strong> accepts either a list of property
 names to project for each element, or a mapping
@@ -473,11 +503,11 @@ element in the array.</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p><strong>union</strong> accepts a variable number of arrays and returns
 an array with all elements from all array argument supplied</p>
@@ -500,11 +530,11 @@ an array with all elements from all array argument supplied</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p><strong>join</strong> joins <code>left</code> and <code>right</code> arrays with a join type
 of either &#39;left&#39;, &#39;right&#39;, or &#39;inner&#39; defined by <code>joinType</code>,
