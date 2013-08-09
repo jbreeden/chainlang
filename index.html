@@ -37,66 +37,136 @@
 <p>Chainlang is a utility for easily creating chainable methods and complex fluent APIs (or fluent interfaces) in JavaScript.</p>
 
 <h1>
-<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h1>
+<a name="motivation" class="anchor" href="#motivation"><span class="octicon octicon-link"></span></a>Motivation</h1>
 
-<p>With chainlang, you define the hierarchical structure of your fluent API as a plain-old JavaScript object. After you've defined this structure (we'll call it your "language specification") you pass it to <code>chainlang.create</code> which takes care of details like making methods chainable or allowing links in a chained expression to share data, among other things.</p>
-
-<p>So, for example, with a language defined like this:</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">fromSpec</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="nx">where</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">cond</span><span class="p">){</span>
-        <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">.</span><span class="nx">filter</span><span class="p">(</span><span class="nx">cond</span><span class="p">);</span>
-    <span class="p">},</span>
-    <span class="nx">take</span><span class="o">:</span> <span class="p">{</span>
-        <span class="nx">all</span><span class="o">:</span> <span class="kd">function</span><span class="p">(){</span>
-            <span class="k">this</span><span class="p">.</span><span class="nx">_breaksChain</span><span class="p">();</span>
-            <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_subject</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">};</span>
-
-<span class="kd">var</span> <span class="nx">from</span> <span class="o">=</span> <span class="nx">chainlang</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">fromSpec</span><span class="p">);</span>
-</pre></div>
-
-<p>we would be able to:</p>
-
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">numbers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">];</span>
-
-<span class="kd">var</span> <span class="nx">evens</span> <span class="o">=</span> 
-    <span class="nx">from</span><span class="p">(</span><span class="nx">numbers</span><span class="p">)</span>
-    <span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">){</span>
-        <span class="k">return</span> <span class="nx">num</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span> 
-    <span class="p">}).</span><span class="nx">take</span><span class="p">.</span><span class="nx">all</span><span class="p">();</span>
-
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">evens</span><span class="p">);</span> <span class="c1">// Logs: [ 2, 4, 6 ]</span>
-</pre></div>
-
-<p>Granted, this isn't the most feature-filled API ever created (<a href="http://jbreeden.github.io/chainlang/fromjs/from.html">yet</a>), but it was incredibly simple to define. There are no closures or other tricks to capture the argument to the <code>from(...)</code> function, it is simply accessible by any method in our language spec, at any level in the hierarchy, as <code>this._subject</code>.</p>
-
-<p>Also note that no care was taken to return <code>this</code> from the methods of <code>fromSpec</code> as is typical with chainable methods. In fact, <code>fromSpec.where</code> doesn't return anything, but we're still able to chain together an expression such as <code>from(numbers).where(cond).take.all()</code>. That's because <code>chainlang.create</code> creates a copy of its argument (the language spec) where all methods are proxied. The proxied methods all have their <code>this</code> context permanently bound to a chain object, and they all return the chain object implicitly.</p>
-
-<p>So, what happens if you want to return a value? Just as in <code>fromSpec.take.all</code> above, you call <code>this._breaksChain()</code>. This sets a flag on the chain object itself that tells the proxied methods to return their own return value instead of implicitly returning the chain object.</p>
-
-<p>That's the basic idea.</p>
+<p>Fuent APIs make code easier to read and understand. Replacing a large options object parameter with a convenient
+fluent API can greatly simplify the use of many library functions. In an interactive environment like the
+nodejs repl, or the Firebug console, programmers can take advantage of auto-completion and exploratory programming
+to uncover the features of your fluent API without having to resort to the documentation.</p>
 
 <h1>
-<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h1>
 
-<p>Chainlang provides a small but powerful set of features to control the semantics of your generated API.
-Some of these features, like the <code>_breaksChain</code> method discussed in the introduction, are fields or methods
-accessible via <code>this</code> within the methods of your language specification object. Others, like <code>_wrapper</code>, are
-special nodes that can be placed within your specification. (For an interesting use of <code>_wrapper</code> nodes, see
-the section on "Join Wrappers" in the <a href="http://jbreeden.github.io/chainlang/fromjs/from.html">full fromjs example</a>)</p>
+<h2>
+<a name="creating-a-chainable-api" class="anchor" href="#creating-a-chainable-api"><span class="octicon octicon-link"></span></a>Creating A Chainable API</h2>
 
-<p>To see all the available features, check out the <a href="http://jbreeden.github.io/chainlang/spec/spec.html">chainlang spec</a>.</p>
+<p>Just pass any JavaScript object to <code>chainlang.create</code> to create a chainable api:</p>
 
-<h1>
-<a name="more-resources" class="anchor" href="#more-resources"><span class="octicon octicon-link"></span></a>More Resources</h1>
+<pre><code>var adder = {
+    add: function(val){ 
+        this._subject += val; 
+    },
+    calc: function() { 
+        return this._subject; 
+    }
+}
 
-<ul>
-<li><a href="http://jbreeden.github.io/chainlang/fromjs/from.html">Example: Creating a full-feature fromjs library</a></li>
-<li><a href="http://jbreeden.github.io/chainlang/source/chainlang.html">Annotated source of chainlang.js</a></li>
-</ul>
+var to = chainlang.create(adder);
+
+// Logs: 10
+console.log(
+    to(1).add(2).add(3).add(4).calc()
+);
+</code></pre>
+
+<p><code>chainlang.create</code> will return a function that starts your chain expression. The optional parameter
+to this function will be saved in <code>this._subject</code> and accessible by all of your methods. If no value
+is returned by a method in the chain, the chain object itself is implicitly returned so you may
+continue to chain other methods.</p>
+
+<h2>
+<a name="using-chainlangappend" class="anchor" href="#using-chainlangappend"><span class="octicon octicon-link"></span></a>Using <code>chainlang.append</code>
+</h2>
+
+<p><code>chainlang.append</code> is a simple function to help you build your language spec before passing it to
+<code>chainlang.create</code>. With <code>chainlang.append</code>, you can declare leaf nodes of an object graph and
+have the parent nodes filled in for you.</p>
+
+<pre><code>var spec = {};
+chainlang.append(spec, 'some.nested.method', function(){});
+
+// Logs: { some: { nested: { method: [Function] } } }
+console.log(spec);
+</code></pre>
+
+<p>If you bind <code>chainlang.append</code> to some object, the first parameter may be omitted</p>
+
+<pre><code>var spec = {};
+var define = chainlang.append.bind(spec);
+
+define('another.nested.method', function(){});
+
+// Logs: { another: { nested: { method: [Function] } } }
+console.log(spec);
+</code></pre>
+
+<h2>
+<a name="sharing-data-between-links" class="anchor" href="#sharing-data-between-links"><span class="octicon octicon-link"></span></a>Sharing Data Between Links</h2>
+
+<p>Along with <code>this._subject</code>, all method calls have access to <code>this._data</code>. <code>this._data</code> is initially
+empty, and is simply provided as a convenient place to store information between links in a chained
+expression.</p>
+
+<pre><code>var spec = {};
+var define = chainlang.append.bind(spec);
+
+define('setData', function(val){ 
+    this._data.field = val; 
+});
+define('logData', function(){ 
+    console.log(this._data.field); 
+});
+
+var chain = chainlang.create(spec);
+
+// Logs: 999
+chain().setData(999).logData();
+</code></pre>
+
+<h2>
+<a name="keeping-your-privates-hidden" class="anchor" href="#keeping-your-privates-hidden"><span class="octicon octicon-link"></span></a>Keeping Your Privates Hidden</h2>
+
+<p>Sometimes it's desirable to hide some methods of your chainable api until it makes sense to use them.
+<code>chainlang</code> provides no built-in support for this, but it is recommended that you simply hide these nodes
+behind a field with a name like '_private'. That way, programmers using your api will not be tempted to use
+these methods in a context where it does not make sense to do so. Also, keeping them <em>all</em> behind
+a field like this, instand of simply prefixing them all with an '_' will prevent the auto-completion
+results from being cluttered with fields that are supposed to be private in the first place. For example:</p>
+
+<pre><code>var delaySpec = {};
+var define = chainlang.append.bind(delaySpec);
+
+define('for', function(count){
+    this._data.count = count;
+
+    // exposing our private 'units' object now that we have a count
+    return this._private.units;
+});
+
+define('_private.units.seconds.then', function(callback){
+    setTimeout(callback, this._data.count * 1000);
+});
+
+define('_private.units.minutes.then', function(callback){
+    setTimeout(callback, this._data.count * 1000 * 60)
+});
+
+var delay = chainlang.create(delaySpec);
+
+// After 5 seconds, logs: '5 seconds elapsed'
+delay().for(5).seconds.then(function(){
+    console.log('5 seconds elapsed');
+});
+
+// After 5 minutes, logs: '5 minutes elapsed'
+delay().for(5).minutes.then(function(){
+    console.log('5 minutes elapsed');
+});
+</code></pre>
+
+<p>In the previous example, it would not make sense to have an expression such as <code>delay().minutes.then(...)</code>.
+The count needs to be declared before the units, so the units object is kept in private storage and exposed
+by <code>return</code>ing it from the <code>for(count)</code> call.</p>
       </section>
     </div>
 
