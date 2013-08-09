@@ -1,16 +1,15 @@
 {
   "name": "chainlang",
   "version": "0.1.0",
-  "description": "chainlang",
-  "main": "hello-world-server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
-  },
-  "repository": "",
+  "description": "Utility for easily creating chainable methods and complex fluent APIs in JavaScript",
+  "main": "chainlang.js",
+  "repository": "https://github.com/jbreeden/chainlang",
   "keywords": [
-    "Node.js"
+    "Node.js",
+    "fluent",
+    "chain"
   ],
-  "author": "",
+  "author": "Jared Breeden",
   "license": "MIT",
   "readmeFilename": "README.md"
 }
