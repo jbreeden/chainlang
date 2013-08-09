@@ -90,14 +90,6 @@
         // means that chains cannot be arbitrarily saved to variables and 
         // interleaved with other chain expressions of the same language.
         var theChain = createChainableProxy(lang);
-        
-        chainlang.append(theChain, '_link.breaks.chain', function () {
-            theChain.__break__ = true;
-        });
-        
-        chainlang.append(theChain, '_link.binds.to', function (nextLink) {
-            theChain.__nextLink__ = nextLink;
-        });
 
         // ### chain expression constructor
         // ---
@@ -112,16 +104,13 @@
             // Resetting the properties on `theChain` for the new expression
             theChain._subject = obj;
             theChain._data = {};
-            theChain._prev = null;
-            theChain.__nextLink__ = undefined;
-            theChain.__break__ = false;
             
             return theChain;
         }
 
         // Returning the `chain` constructor to the client of `chainlang.create`
         return chain;
-    }
+    };
 
     // Privates
     // --------
@@ -138,7 +127,7 @@
             language);
 
         return chain;
-    };
+    }
 
     // This is the self-recursive method for construction of the chainable object
     function createChainableProxyNode(node, chain, language){
@@ -168,26 +157,12 @@
             proxiedMethod;
 
         proxiedMethod = function(){
-            chain._prev = fn.apply(chain, arguments);
-            return returnValue(chain);
-        }
+            var result = fn.apply(chain, arguments);
+            
+            // Any explicit return will prevent the implicit return of the chain
+            return (undefined === result) ? chain : result;
+        };
 
         return proxiedMethod;
-    }
-
-    // Returns `chain.__return__` if `chain.__break__` is set,
-    // or `chain.__nextLink__` if it is set, or else returns
-    // the chain.
-    function returnValue(chain){
-        if (chain.__break__) {
-            return chain._prev;
-        }
-        if (undefined != chain.__nextLink__) {
-            var nextLink = chain.__nextLink__;
-            chain.__nextLink__ = undefined;
-            return nextLink;
-        }
-        
-        return chain;
     }
 }());

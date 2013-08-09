@@ -21,7 +21,6 @@ var define = chainlang.append.bind(fromSpec);
 //</pre>
 define('take', function fromTake(count){
     /* `take` method breaks the chain and returns its own return value */
-    this._link.breaks.chain();
     return take(this._subject, count);
 });
 
@@ -30,7 +29,6 @@ define('take', function fromTake(count){
 // from(array).take.all();
 // </pre>
 define('take.all', function fromTakeAll(){
-    this._link.breaks.chain();
     return this._subject;
 });
 
@@ -39,7 +37,6 @@ define('take.all', function fromTakeAll(){
 // from(array).take.first();
 // </pre>
 define('take.first', function fromTakeFirst(){
-    this._link.breaks.chain();
     return takeFirst(this._subject);
 });
 
@@ -48,7 +45,6 @@ define('take.first', function fromTakeFirst(){
 // from(array).take.last();
 // </pre>
 define('take.last', function fromTakeLast(){
-    this._link.breaks.chain();
     return takeLast(this._subject);
 });
 
@@ -101,7 +97,6 @@ define('union', function fromUnion() {
 //     .take.all();
 // </pre>
 define('left.join', function fromLeftJoin(right) {
-    this._link.breaks.chain();
     this._data.joinType = 'left';
     return this._private.join(right);
 });
@@ -115,7 +110,6 @@ define('left.join', function fromLeftJoin(right) {
 //     .take.all();
 // </pre>
 define('right.join', function fromRightJoin(right) {
-    this._link.breaks.chain();
     this._data.joinType = 'right';
     return this._private.join(right);
 });
@@ -129,7 +123,6 @@ define('right.join', function fromRightJoin(right) {
 //     .take.all();
 // </pre>
 define('join', function fromJoinOn(right){
-    this._link.breaks.chain();
     this._data.joinType = 'inner';
     return this._private.join(right);
 });
@@ -137,7 +130,6 @@ define('join', function fromJoinOn(right){
 // Using a private function to encapsulate the common
 // operations for all join types
 define('_private.join', function (right) {
-    this._link.breaks.chain();
     this._data.right = right;
     return this._private.nodes.on;
 });
@@ -147,8 +139,8 @@ define('_private.join', function (right) {
 //  expose different methods at different places in the call chain.
 //  We would not, for example, want to expose the `on` method at
 //  the root of the fluent api because a call like `from(array).on(...)`
-//  would not make sense. So, we only return the prive `on` node after
-//  an invocation of some `join` method, as in `from(a).left.join(b).on(...)`
+//  would not make sense. So, we only return the private `on` node after
+//  an invocation of some `join` method, as in `from(a).left.join(b).on(...)`*
 define('_private.nodes.on',{
     on: function (key){
         this._subject = join(

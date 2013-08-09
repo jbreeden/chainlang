@@ -67,59 +67,39 @@ describe('A chain function returned from chainlang.create', function(){
 describe('A chain object', function(){
     it('Implicitly returns itself from all decendant methods', function(){
         var chain = chainlang.create({
-            returnsScalar: function(){
-                return 1;
+            returnsNothing: function(){
+                return;
             },
             levelTwo: {
-                returnsScalar: function(){
-                    return 2;
+                returnsNothing: function(){
+                    return;
                 }
             }
         });
         
         expect(
-            chain().returnsScalar()
+            chain().returnsNothing()
         ).to.eql(
             chain()
         );
         
         expect(
-            chain().levelTwo.returnsScalar()
+            chain().levelTwo.returnsNothing()
         ).to.eql(
             chain()
         );
     });
     
-    it('contains a "this._link.breaks.chain" method that prevents the implicit return of the chain object', function(){
+    it('Will return any explicit return value instead of returning itself implicitly', function(){
         var chain = chainlang.create({
-            iBreakTheChain: function(){
-                this._link.breaks.chain();
-                return 'some scalar';
+            returnsSomething: function(){
+                return 'something';
             }
         });
         
         expect(
-            chain().iBreakTheChain()
-        ).to.eql("some scalar")
-    });
-
-    it('contains a "_prev" property that always contains the return value of the last function in the chain', function(){
-        var chain = chainlang.create(
-            {
-                returnsOne: function(){ return 1; },
-                returnsTwo: function(){ return 2; },
-                breaksAndReturnsPrev: function(){
-                    this._link.breaks.chain();
-                    return this._prev;
-                }
-            });
-
-        expect(
-            chain().returnsOne().breaksAndReturnsPrev()
-        ).to.be(1);
-        expect(
-            chain().returnsTwo().breaksAndReturnsPrev()
-        ).to.be(2);
+            chain().returnsSomething()
+        ).to.eql("something")
     });
 
     it('contains a "_data" property which can be used to pass data through the chain and is initially empty', function(){
@@ -138,7 +118,6 @@ describe('A chain object', function(){
     it('contains a "_subject" property, which references the optional parameter to the chain function', function(){
         var chain = chainlang.create({
             getSubject: function(){
-                this._link.breaks.chain();
                 return this._subject;
             }
         });
@@ -153,36 +132,36 @@ describe('A chain object', function(){
     it('allows chaining of methods arbitrarily nested within properties of the language', function(){
         var chain = chainlang.create(
             {
-                topLevelFn : function(){
-                    return 1;
+                addOne : function(){
+                    this._subject = this._subject + 1;
                 },
                 secondLevel : {
-                    fn : function (){
-                        return this._prev + 1;
+                    addOne : function (){
+                        this._subject = this._subject + 1;
                     },
                     thirdLevel : {
-                        fn : function(){
-                            return this._prev + 1;
+                        addOne : function(){
+                            this._subject = this._subject + 1;
                         }
                     }                    
                 }
             });
 
         expect(
-            chain().topLevelFn()._prev
-        ).to.be(1);
-
-        expect(
-            chain().topLevelFn().secondLevel.fn()._prev
+            chain(1).addOne()._subject
         ).to.be(2);
 
         expect(
-            chain().topLevelFn().secondLevel.thirdLevel.fn()._prev
-        ).to.be(2);
-
-        expect(
-            chain().topLevelFn().secondLevel.fn().secondLevel.thirdLevel.fn()._prev
+            chain(1).addOne().secondLevel.addOne()._subject
         ).to.be(3);
+
+        expect(
+            chain(1).addOne().secondLevel.thirdLevel.addOne()._subject
+        ).to.be(3);
+
+        expect(
+            chain(1).addOne().secondLevel.addOne().secondLevel.thirdLevel.addOne()._subject
+        ).to.be(4);
     });
 
     it('is bound to "this" for every method call in the chain, even for methods of child objects', function(){
@@ -226,7 +205,7 @@ describe('The _data property of a chain', function(){
         });
 
         expect(
-            chain().setsData().doesNothing().readsAndReturnsData()._prev
+            chain().setsData().doesNothing().readsAndReturnsData()
         ).to.be(1);
     });
 });
@@ -238,7 +217,6 @@ describe('Any node in the chain object graph', function(){
         var chainSpec = {};
         chainSpec.prop = spy; /* spy is a function, so prop is a method */
         chainSpec.prop.methodsStillAvailable = function(){
-            this._link.breaks.chain();
             return true;
         }
         
@@ -249,39 +227,6 @@ describe('Any node in the chain object graph', function(){
         expect(spy.called).to.be(true);
         expect(chain().prop.methodsStillAvailable()).to.be(true);
     });
-});
-
-describe('Any method in the language spec', function(){
-    it('may call `this._link.binds.to` to return an object than the root of the chain object instead of the root', function(){
-        var rangeSpec = {
-            from: function(num){
-                this._data.from = num;
-
-                // `this._link.binds.to` itself to expose its children
-                // as the next possible calls in the chain
-                this._link.binds.to(this.from);
-            }
-        };
-
-        rangeSpec.from.to = function(num){
-            this._link.breaks.chain();
-
-            var result = [];
-            for(i = this._data.from; i <= num; ++i){
-                result.push(i);
-            }
-
-            return result;
-        }
-
-        var range = chainlang.create(rangeSpec);
-
-        expect(
-            range().from(2).to(7)
-        ).to.eql(
-            [2, 3, 4, 5, 6, 7]
-        );
-    })
 });
 
 function allFieldsOfFirstAppearInSecond(obj1, obj2){
