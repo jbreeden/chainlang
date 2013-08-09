@@ -1,61 +1,138 @@
-# Chainlang
+Chainlang
+=========
 
 Chainlang is a utility for easily creating chainable methods and complex fluent APIs (or fluent interfaces) in JavaScript.
 
-# Introduction
+Motivation
+==========
 
-With chainlang, you define the hierarchical structure of your fluent API as a plain-old JavaScript object. After you've 
-defined this structure (we'll call it your "language specification") you pass it to `chainlang.create` which takes care 
-of details like making methods chainable or allowing links in a chained expression to share data, among other things.
+Fuent APIs make code easier to read and understand. Replacing a large options object parameter with a convenient
+fluent API can greatly simplify the use of many library functions. In an interactive environment like the
+nodejs repl, or the Firebug console, programmers can take advantage of auto-completion and exploratory programming
+to uncover the features of your fluent API without having to resort to the documentation.
 
-So, for example, with a language defined like this:
+Usage
+=====
 
-```javascript
-var fromSpec = {
-    where: function(cond){
-        this._subject = this._subject.filter(cond);
+Creating A Chainable API
+------------------------
+
+Just pass any JavaScript object to `chainlang.create` to create a chainable api:
+
+```
+var adder = {
+    add: function(val){ 
+        this._subject += val; 
     },
-    take: {
-        all: function(){
-            return this._subject;
-        }
+    calc: function() { 
+        return this._subject; 
     }
-};
+}
 
-var from = chainlang.create(fromSpec);
+var to = chainlang.create(adder);
+
+// Logs: 10
+console.log(
+    to(1).add(2).add(3).add(4).calc()
+);
 ```
 
-we would be able to:
+`chainlang.create` will return a function that starts your chain expression. The optional parameter
+to this function will be saved in `this._subject` and accessible by all of your methods. If no value
+is returned by a method in the chain, the chain object itself is implicitly returned so you may
+continue to chain other methods.
 
-```javascript
-var numbers = [1, 2, 3, 4, 5, 6];
+Using `chainlang.append`
+------------------------
 
-var evens = 
-    from(numbers)
-    .where(function(num){
-        return num % 2 == 0; 
-    }).take.all();
+`chainlang.append` is a simple function to help you build your language spec before passing it to
+`chainlang.create`. With `chainlang.append`, you can declare leaf nodes of an object graph and
+have the parent nodes filled in for you.
 
-console.log(evens); // Logs: [ 2, 4, 6 ]
+```
+var spec = {};
+chainlang.append(spec, 'some.nested.method', function(){});
+
+// Logs: { some: { nested: { method: [Function] } } }
+console.log(spec);
 ```
 
-Granted, this isn't the most feature-filled API ever created ([yet](http://jbreeden.github.io/chainlang/fromjs/from.html)), 
-but it was incredibly simple to define. There measures taken to capture the argument to the `from(...)` function, it is simply
-accessible by any method in our language spec, at any level in the hierarchy, as `this._subject`.
+If you bind `chainlang.append` to some object, the first parameter may be omitted
 
-Also no care was taken to return `this` from the methods of `fromSpec` as is typical with chainable methods. 
-In fact, `fromSpec.where` doesn't return anything, but we're still able to chain together an expression such as 
-`from(numbers).where(cond).take.all()`. That's because `chainlang.create` creates a copy of its argument (the 
-language spec) where all methods are proxied. The proxied methods all have their `this` context permanently bound
-to a chain object, and they all return the chain object implicitly if you don't explicitly return some other value.
+```
+var spec = {};
+var define = chainlang.append.bind(spec);
 
-That's the basic idea.
+define('another.nested.method', function(){});
 
-# Features
+// Logs: { another: { nested: { method: [Function] } } }
+console.log(spec);
+```
 
-Chainlang provides a small but powerful set of features to control the semantics of your generated API. To see all the available 
-features, check out
+Sharing Data Between Links
+--------------------------
 
-* [The chainlang spec](http://jbreeden.github.io/chainlang/spec/spec.html)
-* [Example: Creating a full-feature fromjs library](http://jbreeden.github.io/chainlang/fromjs/from.html)
-* [Annotated source of chainlang.js](http://jbreeden.github.io/chainlang/source/chainlang.html)
+Along with `this._subject`, all method calls have access to `this._data`. `this._data` is initially
+empty, and is simply provided as a convenient place to store information between links in a chained
+expression.
+
+```
+var spec = {};
+var define = chainlang.append.bind(spec);
+
+define('setData', function(val){ 
+    this._data.field = val; 
+});
+define('logData', function(){ 
+    console.log(this._data.field); 
+});
+
+var chain = chainlang.create(spec);
+
+// Logs: 999
+chain().setData(999).logData();
+```
+
+Keeping Your Privates Hidden
+----------------------------
+
+Sometimes it's desirable to hide some methods of your chainable api until it makes sense to use them.
+`chainlang` provides no built-in support for this, but it is recommended that you simply hide these nodes
+behind a field with a name like '_private'. That way, programmers using your api will be able to tell
+you did not intend those methods to be a part of the public interface. Also, keeping them *all* behind
+a field like this, instand of simply prefixing them all with an '_' will prevent the auto-completion
+results from being cluttered with fields that are supposed to be private in the first place. For example:
+
+```
+var delaySpec = {};
+var define = chainlang.append.bind(delaySpec);
+
+define('for', function(count){
+    this._data.count = count;
+    return this._private.units;
+});
+
+define('_private.units.seconds.then', function(callback){
+    setTimeout(callback, this._data.count * 1000);
+});
+
+define('_private.units.minutes.then', function(callback){
+    setTimeout(callback, this._data.count * 1000 * 60)
+});
+
+var delay = chainlang.create(delaySpec);
+
+// After 5 seconds, logs: '5 seconds elapsed'
+delay().for(5).seconds.then(function(){
+    console.log('5 seconds elapsed');
+});
+
+// After 5 minutes, logs: '5 minutes elapsed'
+delay().for(5).minutes.then(function(){
+    console.log('5 minutes elapsed');
+});
+```
+
+In the previous example, it would not make sense to have an expression such as `delay().minutes.then(...)`.
+The count needs to be declared before the units, so the units object is kept in private storage and exposed
+by `return`ing it from the `for(count)` call.
