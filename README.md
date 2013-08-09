@@ -1,7 +1,7 @@
 Chainlang
 =========
 
-Chainlang is a utility for easily creating chainable methods and complex fluent APIs (or fluent interfaces) in JavaScript.
+Chainlang is a utility for easily creating chainable methods and complex fluent APIs in JavaScript.
 
 Motivation
 ==========
