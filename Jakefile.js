@@ -11,10 +11,18 @@ namespace('docs', function(){
 
     desc('Makes sure folder ../chainlang-gh-pages/source exists. (This location will hold the docco output for chainlang)');
     directory('chainlang-gh-pages/source');
-
+    
+    desc('Makes sure folder ../chainlang-gh-pages/fromjs exists. (This location will hold the docco output for fromjs)');
+    directory('chainlang-gh-pages/fromjs');
+    
     desc('Makes all the documentation');
-    task('all', ['chainlang-docco', 'chainlang-spec']);
+    task('all', ['chainlang-docco', 'chainlang-spec', 'fromjs-docco']);
 
+    desc('Generates documentation for from.js with docco');
+    task('fromjs-docco', ['chainlang-gh-pages', 'chainlang-gh-pages/fromjs'], function(){
+        childProc.exec('docco -o ./chainlang-gh-pages/fromjs/ ./examples/from.js');
+    });
+    
     desc('Generates documentation for chainlang.js with docco');
     task('chainlang-docco', ['chainlang-gh-pages', 'chainlang-gh-pages/source'], function(){
         childProc.exec('docco -o ./chainlang-gh-pages/source/ ./chainlang.js');

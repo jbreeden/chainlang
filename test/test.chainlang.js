@@ -249,64 +249,6 @@ describe('Any node in the chain object graph', function(){
         expect(spy.called).to.be(true);
         expect(chain().prop.methodsStillAvailable()).to.be(true);
     });
-
-    it('may include a "_wrapper" method, used to wrap descendant functions to process args/output', function(){
-        var lang = {
-            returnsArg: function(arg){
-                this._link.breaks.chain();
-                return arg;
-            }
-        };
-        lang.negator = {
-            _wrapper: function(nestedfn, args){
-                nestedfn(args[0]);
-                return !this._prev;
-            },
-            returnsArg: lang.returnsArg
-        };
-
-        var chain = chainlang.create(lang);
-
-        expect(chain().returnsArg(true)).to.be(true);
-        expect(chain().negator.returnsArg(true)).to.be(false);
-    });
-});
-
-describe('wrappers', function(){
-    it('may be arbitrarily nested', function(){
-        // Defining a `returnsArg` node (will be used mutiple times in langSpec)
-        var argReturningNode = function(arg){
-            this._link.breaks.chain()
-            return arg;
-        }
-        
-        // Defining a `negator` node factory
-        function createNegator(){
-            return {
-                _wrapper: function(called, args){
-                    called.apply(null, args);
-                    return !this._prev;
-                }
-            };
-        };
-        
-        // Creating language spec object
-        var langSpec = {
-            returnsArg: argReturningNode,
-            negator: createNegator()
-        };
-        langSpec.negator.returnsArg = argReturningNode;
-        
-        // Adding a nested `negator` node
-        langSpec.negator.negator = createNegator();
-        langSpec.negator.negator.returnsArg = argReturningNode;
-
-        var chain = chainlang.create(langSpec);
-        
-        expect(chain().returnsArg(true)).to.be(true);
-        expect(chain().negator.returnsArg(true)).to.be(false);
-        expect(chain().negator.negator.returnsArg(true)).to.be(true);
-    });
 });
 
 describe('Any method in the language spec', function(){

@@ -6,75 +6,61 @@
 // Require chainlang
 var chainlang = require('../chainlang');
 
+// Fluent API creation
+// -------------------
+
 // Declaring our `fromSpec` obect
 var fromSpec = {};
- 
-// **take** returns either `count` elements of `_subject`,
-// or `_subject.length` elements, whichever is lower.  
+
+// Binding an `append` method for phrase declaration
+var phrase = chainlang.append.bind(fromSpec);
+
+// **take** <br/>
 // <pre>
 // from(array).take(count);
 //</pre>
-fromSpec.take = function take(count){
+phrase('take', function fromTake(count){
     /* `take` method breaks the chain and returns its own return value */
     this._link.breaks.chain();
+    return take(this._subject, count);
+});
 
-    var result = [];
-    /* this._subject is initialized with the argument to from(...) */
-    for(i = 0; i < this._subject.length && i < count; ++i){
-        result.push(this._subject[i]);
-    }
-    
-    return result;
-};
-
-// **take.all** returns all of the elements of `_subject`
+// **take.all** <br/>
 // <pre>
 // from(array).take.all();
 // </pre>
-fromSpec.take.all = function all(){
+phrase('take.all', function fromTakeAll(){
     this._link.breaks.chain();
     return this._subject;
-}
+});
 
-// **take.first** returns the first element of `_subject`
+// **take.first** <br/>
 // <pre>
 // from(array).take.first();
 // </pre>
-fromSpec.take.first = function first(){
+phrase('take.first', function fromTakeFirst(){
     this._link.breaks.chain();
-    
-    if(!(this._subject.length >= 1)){
-        return;
-    }
-    return this._subject[0];
-}
+    return takeFirst(this._subject);
+});
 
-// **take.last** returns the last element of `_subject`
+// **take.last** <br/>
 // <pre>
 // from(array).take.last();
 // </pre>
-fromSpec.take.last = function last(){
+phrase('take.last', function fromTakeLast(){
     this._link.breaks.chain();
-    
-    if(!(this._subject.length >= 1)){
-        return;
-    }
-    return this._subject[this._subject.length - 1];
-}
+    return takeLast(this._subject);
+});
 
-// **where** accepts a function, `cond`, and uses it to
-// filter the `_subject` array
+// **where** <br/>
 // <pre>
 // from(array).where(cond).take.all();
 // </pre>
-fromSpec.where = function where(cond){
+phrase('where', function fromWhere(cond){
     this._subject = this._subject.filter(cond);
-};
+});
 
-// **select** accepts either a list of property
-// names to project for each element, or a mapping
-// function, `projector`, used to transform each
-// element in the array.  
+// **select** <br/>
 // <pre>
 // from(array).select("name", "id").take.all();
 // from(array).select(projectoreFn).take.all();
@@ -87,16 +73,135 @@ fromSpec.where = function where(cond){
 //     .where(function(el){ el != null; })
 //     .take.all();
 // </pre>
-fromSpec.select = function select(projector){
+phrase('select', function fromSelect(projector) {
+    this._subject = select(this._subject, projector);
+});
+
+// **union** <br/>
+// <pre>
+// /* Getting all objects of array1, array2[, array3]...
+//    with id == 2 */
+// from(array1)
+//     .union(array2[, array3]...)
+//     .where(function(el){ return el.id == 2; })
+//     .take.all();
+// </pre>
+phrase('union', function fromUnion() {
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift(this._subject);
+    this._subject = union.apply(null, args);
+});
+
+// **left.join** <br/>
+// <pre>
+// /* left join two collections on some field */
+// from(array1)
+//     .left.join(array2)
+//     .on('fieldName')
+//     .take.all();
+// </pre>
+phrase('left.join', function fromLeftJoin(right) {
+    this._link.breaks.chain();
+    this._data.joinType = 'left';
+    this._data.right = right;
+    
+    return {
+        on: on.bind(this)
+    }
+});
+
+// **right.join** <br/>
+// <pre>
+// /* right join two collections on some field */
+// from(array1)
+//     .right.join(array2)
+//     .on('fieldName')
+//     .take.all();
+// </pre>
+phrase('right.join', function fromRightJoin(right) {
+    this._link.breaks.chain();
+    this._data.joinType = 'right';
+    this._data.right = right;
+    
+    return {
+        on: on.bind(this)  
+    }
+});
+
+// **join** <br/>
+// <pre>
+// /* inner join two collections on some field */
+// from(array1)
+//     .join(array2)
+//     .on('fieldName')
+//     .take.all();
+// </pre>
+phrase('join', function fromJoinOn(right){
+    this._link.breaks.chain();
+    this._data.joinType = 'inner';
+    this._data.right = right;
+    
+    return {
+        on: on.bind(this)  
+    }
+});
+
+function on(key){
+    this._subject = join(
+        this._subject, 
+        this._data.right, 
+        this._data.joinType, 
+        key,
+        false);
+    
+    return this;
+}
+
+// Standard Api
+// ------------
+
+// **take** takes the first `count` elements from `collection`
+function take(collection, count){
+    var result = [];
+    
+    for(i = 0; i < collection.length && i < count; ++i){
+        result.push(collection[i]);
+    }
+    
+    return result;
+}
+
+// **takeFirst** returns the first element of `collection`
+function takeFirst(collection){
+    if(!(collection.length >= 1)){
+        return;
+    }
+    return collection[0];
+}
+
+// **takeLast** returns the last element of `collection`
+function takeLast(collection){
+    if(!(collection.length >= 1)){
+        return;
+    }
+    return collection[collection.length - 1];
+}
+
+// **select** accepts either a list of property
+// names to project for each element, or a mapping
+// function, `projector`, used to transform each
+// element in the array.
+function select(collection, projector){
+    var keys = Array.prototype.slice.call(arguments, 1);
     if(typeof projector !== "function"){
-        projector = makeProjectorForKeys.apply(null, arguments);
+        projector = makeProjectorForKeys.apply(null, keys);
     }
 
     var result = [];
-    this._subject.forEach(function(el){
+    collection.forEach(function(el){
         result.push(projector(el))
     });
-    this._subject = result;
+    return result;
 };
 
 function makeProjectorForKeys(){
@@ -111,125 +216,43 @@ function makeProjectorForKeys(){
     }
 };
 
-// **union** accepts a variable number of arrays, and appends each element
-// of each array onto this._subject
-// <pre>
-// /* Getting all objects of array1, array2[, array3]...
-//    with id == 2 */
-// from(array1)
-//     .union(array2[, array3]...)
-//     .where(function(el){ return el.id == 2; })
-//     .take.all();
-// </pre>
-fromSpec.union = function union(){
-    for(var arg = 0; arg < arguments.length; ++arg){
-        for(var el = 0; el < arguments[arg].length; ++el){
-            this._subject.push(arguments[arg][el]);
-        }
-    }
-};
-
-// **join** performs a join of current `_subject` and `right` param.
-// Join may be inner (the default), left, or right (see below). Note:
-// you must call [on](#on) with some key to perform the join.
-fromSpec.join = function join(right){
-    this._data.left = this._subject;
-    this._data.right = right;
+// **union** accepts a variable number of arrays and returns
+// an array with all elements from all array argument supplied
+function union(){
+    var result = [];
+    var args = Array.prototype.slice.call(arguments);
+    debugger;
+    args.forEach(function(arg){
+        arg.forEach(function(el){
+            result.push(el);   
+        })
+    });
     
-    if(!this._data.joinType){
-        // Default to inner join (just as with SQL)
-        this._data.joinType = 'inner';
-    }
-    
-    // Only want to expose children of join as the next possible
-    // methods in the chain. (Every 'join' must be followed by an 'on')
-    this._link.binds.to(this.join);
-}
-
-// Join Wrappers
-// -------------
-
-// **left** is a wrapper for join that sets up a `joinType` variable.
-// `joinType` tells the `on` method how to join two collections. In
-//  this case, we select a left join.  
-// Ex.
-// <pre>
-// from(array1).left.join(array2).on('id').take.all();
-// from(array1).where(someCondIsTrue).left.join(array2).on('id').take(3);
-// </pre>
-fromSpec.left = {
-    _wrapper: function(called, args){
-        this._data.joinType = 'left';
-        called.apply(null, args);
-    },
-    join: fromSpec.join
+    return result;
 };
 
-// **right** is a wrapper for join that sets up a `joinType` variable.
-// `joinType` tells the `on` method how to join two collections. In
-//  this case, we select a right join.  
-// Ex.
-// <pre>
-// from(array1).right.join(array2).on('id').take.all();
-// from(array1).where(someCondIsTrue).right.join(array2).on('id').take(3);
-// </pre>
-fromSpec.right = {
-    _wrapper: function(called, args){
-        this._data.joinType = 'right';
-        called.apply(null, args);
-    },
-    join: fromSpec.join
-};
-
-// **inner** is a wrapper for join that sets up a `joinType` variable.
-// `joinType` tells the `on` method how to join two collections. In
-//  this case, we select a inner join. (Note: inner join is the default,
-//  so `from(array1).inner.join(array2).on('id')` is equivalent to
-//  `from(array1).join(array2).on('id')`  
-// Ex.
-// <pre>
-// from(array1).left.join(array2).on('id').take.all();
-// from(array1).where(someCondIsTrue).left.join(array2).on('id').take(3);
-// </pre>
-fromSpec.inner = {
-    _wrapper: function(called, args){
-        this._data.joinType = 'inner';
-        called.apply(null, args);
-    },
-    join: fromSpec.join
-}
-
-
-// **on** accepts a `key` to join elements on, and an optional `isStrict` flag.
-// If `isStrict` is false, the default, then comparisons are made with `==`. Otherwise,
-// comparisons are with `===`. The result of on is a collection of objects with
-// `left` and `right` fields, containing the elements from the "left" and "right"
-// collections that were matched on their `key` fields. Joins may be left, right, or inner.
-// Ex.
-// <pre>
-// from(array1).join(array2).on('id').take.all();
-// from(array1).left.join(array2).on('val', true).take.first();
-// </pre>
-fromSpec.join.on = function on(key, isStrict){
+// **join** joins `left` and `right` arrays with a join type
+// of either 'left', 'right', or 'inner' defined by `joinType`,
+// on the `key` field.
+function join(left, right, joinType, key, isStrict){
     var outter,
         outterPrefix,
         inner,
         innerPrefix,
         result = [],
-        resultItem = {}
-        chain = this;
+        resultItem = {};
 
-    if(chain._data.joinType === 'left'
-        || chain._data.joinType === 'inner'){
-        outter = chain._data.left;
+    if(joinType === 'left'
+        || joinType === 'inner'){
+        outter = left;
         outterPrefix = 'left';
-        inner = chain._data.right;
+        inner = right;
         innerPrefix = 'right'
     }
-    else if(chain._data.joinType === 'right'){
-        outter = chain._data.right;
+    else if(joinType === 'right'){
+        outter = right;
         outterPrefix = 'right';
-        inner = chain._data.left;
+        inner = left;
         innerPrefix = 'left'
     }  else {
         throw 'invalid join type';
@@ -259,7 +282,7 @@ fromSpec.join.on = function on(key, isStrict){
             }
         })
         
-        if(!matched && !(chain._data.joinType === 'inner')){
+        if(!matched && !(joinType === 'inner')){
             resultItem = {};
             resultItem[outterPrefix] = {};
             resultItem[innerPrefix] = null;
@@ -270,7 +293,7 @@ fromSpec.join.on = function on(key, isStrict){
         }
     });
     
-    this._subject = result;
+    return result;
 };
 
 function strictCompare(first, second){

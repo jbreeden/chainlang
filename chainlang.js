@@ -43,12 +43,21 @@
     // chainlang.append
     // ----------------
     
-    // Adds a descendant node at any depth, creating the parent
-    // node along the way if they are undefined.
-    chainlang.append = function (obj, path, node) {
+    // Adds a `leaf` node to the `root` object at any depth, creating
+    // the parent nodes along the way if they are undefined. <br/>
+    // *Note: If no root parameter is supplied, append will
+    //  assume that `this` is bound to the root object.*
+    chainlang.append = function append(root, path, leaf) {
+        if(arguments.length < 3){
+            // Fix arguments
+            leaf = arguments[1];
+            path = arguments[0];
+            root = this;
+        }
+        
         var descendants = path.split('.');
         
-        var currentNode = obj;
+        var currentNode = root;
         var finalIndex = descendants.length - 1;
         
         for (var i = 0; i <= finalIndex; ++i) {
@@ -60,7 +69,7 @@
                 currentNode[childName] = (undefined === child) ? {} : child; 
                 currentNode = currentNode[childName];
             } else {
-                currentNode[childName] = node;
+                currentNode[childName] = leaf;
             }
         }
     };
@@ -106,7 +115,6 @@
             theChain._prev = null;
             theChain.__nextLink__ = undefined;
             theChain.__break__ = false;
-            theChain.__wrapperDepth__ = 0;
             
             return theChain;
         }
@@ -122,132 +130,70 @@
     // spec object to create an object with chainable methods. (These are
     // essentially "proxied" versions of the methods found on the language object.)
     function createChainableProxy(language){
-        var wrappers = [],
-            chain = {};
+        var chain = {};
 
         createChainableProxyNode(
             chain,
             chain, 
-            language,
-            wrappers);
+            language);
 
         return chain;
     };
 
     // This is the self-recursive method for construction of the chainable object
-    function createChainableProxyNode(node, chain, language, wrappers){
-        var hasWrapper = hasWrapperMethod(language);
-
-        if(hasWrapper){
-            wrappers.push(language['_wrapper']);
-        }
-
-
-        for(var propName in language){
+    function createChainableProxyNode(node, chain, language){
+        Object.keys(language).forEach(function(key){
             // Properties named with a leading underscore are reserved for chain-level
             // semi-hidden data to avoid conflicts with language methods. So, for now
             // we'll just ignore any we come across. May want to throw an error later.
-            if(propName[0] == "_"){
-                continue;
+            if(key[0] == "_"){
+                return;
             }
 
-            var prop = language[propName];
+            var prop = language[key];
             if(prop === undefined || prop === null){
-               continue;
+               return;
             }
             
-            var makeNode = true;
             if(typeof prop == "function"){
-                node[propName] = createChainableProxiedMethod(chain, prop, wrappers);
+                node[key] = createChainableProxiedMethod(chain, prop);
+                createChainableProxyNode(node[key], chain, prop);
             }
             else if(typeof prop == "object"){
-                node[propName] = {};
+                node[key] = {};
+                createChainableProxyNode(node[key], chain, prop);
             }
             else{
-                makeNode = false;
-                node[propName] = prop;
-            }
-            
-            if(makeNode){
-                createChainableProxyNode(node[propName], chain, prop, wrappers);
-            }
-        }
-
-        if(hasWrapper){
-            wrappers.pop();
-        }
+                node[key] = prop;
+            }    
+        });
     }
 
-    function hasWrapperMethod(obj){
-        return (
-            obj['_wrapper'] !== undefined
-            && typeof obj['_wrapper'] === "function"
-        );
-    }
-
-    function createChainableProxiedMethod(chain, fn, wrappers){
+    function createChainableProxiedMethod(chain, fn){
         var i,
-            proxiedMethod,
-            wrappers = captureArray(wrappers);
+            proxiedMethod;
 
         proxiedMethod = function(){
-            chain.__wrapperDepth__ = wrappers.length;
             chain._prev = fn.apply(chain, arguments);
             return returnValue(chain);
         }
 
-        if(wrappers.length > 0){
-            for(i = wrappers.length - 1; i >= 0; i -= 1){
-                proxiedMethod = createWrappedChainableMethod({
-                        chain: chain,
-                        wrapperFunction: wrappers[i],
-                        proxiedMethod: proxiedMethod,
-                        stackHeight: i
-                    });
-            }
-        }
-
         return proxiedMethod;
-    }
-
-    // `opt` options arguments should contain fields
-    // `chain`, `wrapperFunction`, `proxiedMethod`, `stackHeight`
-    function createWrappedChainableMethod(opt){
-        return function(){
-            opt.chain._prev = opt.wrapperFunction.call(opt.chain, opt.proxiedMethod, arguments);
-            opt.chain.__wrapperDepth__ = opt.stackHeight;
-            
-            return returnValue(opt.chain);
-        }
     }
 
     // Returns `chain.__return__` if `chain.__break__` is set,
     // or `chain.__nextLink__` if it is set, or else returns
     // the chain.
     function returnValue(chain){
-        if (chain.__wrapperDepth__ === 0) {
-            if (chain.__break__) {
-                return chain._prev;
-            }
-            if (undefined != chain.__nextLink__) {
-                var nextLink = chain.__nextLink__;
-                chain.__nextLink__ = undefined;
-                return nextLink;
-            }
+        if (chain.__break__) {
+            return chain._prev;
+        }
+        if (undefined != chain.__nextLink__) {
+            var nextLink = chain.__nextLink__;
+            chain.__nextLink__ = undefined;
+            return nextLink;
         }
         
         return chain;
-    }
-
-    // "Captures" an array. (i.e. makes a new array with the same references
-    //  to avoid having the contents of a closed-over array changed externally)
-    function captureArray(array) {
-        var capturedArray = [];
-
-        for(var i = 0; i < array.length; i += 1){
-            capturedArray[i] = array[i];
-        }
-
-        return capturedArray;
     }
 }());
