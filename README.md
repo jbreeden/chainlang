@@ -75,26 +75,31 @@ Using `chainlang.append`
 
 `chainlang.append` is a simple function to help you build your language spec before passing it to
 `chainlang.create`. With `chainlang.append`, you can declare leaf nodes of an object graph and
-have the parent nodes filled in for you.
+have the parent nodes filled in for you. So, the previous example could have been written like this:
 
 ```
-var spec = {};
-chainlang.append(spec, 'some.nested.method', function(){});
+var even = {};
+chainlang.append(even, 'deeply.nested.methods', function(){ return; });
+chainlang.append(even, 'are.chainable', function(){ console.log(true); });
+even = chainlang.create(even);
 
-// Logs: { some: { nested: { method: [Function] } } }
-console.log(spec);
+// Logs: true
+even().deeply.nested.methods().are.chainable();
 ```
 
 If you bind `chainlang.append` to some object, the first parameter may be omitted
 
 ```
-var spec = {};
-var define = chainlang.append.bind(spec);
+var even = {};
+var define = chainlang.append.bind(even);
 
-define('another.nested.method', function(){});
+define('deeply.nested.methods', function(){ return; });
+define('are.chainable', function(){ console.log(true); });
 
-// Logs: { another: { nested: { method: [Function] } } }
-console.log(spec);
+even = chainlang.create(even);
+
+// Logs: true
+even().deeply.nested.methods().are.chainable();
 ```
 
 Sharing Data Between Links
