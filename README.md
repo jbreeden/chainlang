@@ -150,28 +150,33 @@ chainlang to create an object with chainable methods in `chainlang.create`.
 ```
 var chainlang = require('./chainlang')
 
-var to = {};
-var define = chainlang.append.bind(to);
+var is = {};
 
-define('be', function(val){
-    console.log(val);
-});
+// `is.even(...)` determines whether a value is even
+is.even = function(){
+    return (this._subject % 2 === 0);
+};
 
-var notTo = chainlang.proxy(to, function(fn){
+// `isNot` has all the same methods of `is`, but negates their returns
+var isNot = chainlang.proxy(is, function(fn){
     return function(){
-        fn.call(this, !arguments[0]);  
+        return !fn.apply(this, arguments);  
     };
 });
-       
-define('or.not.to', notTo);
 
-to = chainlang.create(to);
+is.not = isNot;
 
-// Logs:
-// true
-// flase
-to().be(true)
-    .or.not.to.be(true);
+is = chainlang.create(is);
+
+// Logs: true
+console.log(
+    is(68).even()
+);
+
+// Logs: false
+console.log(
+    is(68).not.even()
+);
 ```
 
 More Information
