@@ -14,7 +14,7 @@ to uncover the features of your fluent API without having to resort to the docum
 Usage
 =====
 
-Creating A Chainable API
+Creating a Chainable API
 ------------------------
 
 Just pass any JavaScript object to `chainlang.create` to create a chainable api:
@@ -41,6 +41,34 @@ console.log(
 to this function will be saved in `this._subject` and accessible by all of your methods. If no value
 is returned by a method in the chain, the chain object itself is implicitly returned so you may
 continue to chain other methods.
+
+Everything is Chainable
+-----------------------
+
+The object you pass to `chainlang.create` need not have all of it's method at the root level, as in
+the example above. Any method on the object graph, not matter how deeply nested, will be chainable.
+
+```
+var even = {
+    deeply: {
+        nested: {
+            methods: function(){
+                return;   
+            }
+        }
+    },
+    are: {
+        chainable: function(){
+            console.log(true);   
+        }
+    }
+};
+
+var even = chainlang.create(even);
+
+// Logs: true
+even().deeply.nested.methods().are.chainable();
+```
 
 Using `chainlang.append`
 ------------------------
@@ -148,8 +176,6 @@ create a copy of an object with all of its methods proxied. This is the same tec
 chainlang to create an object with chainable methods in `chainlang.create`.
 
 ```
-var chainlang = require('./chainlang')
-
 var is = {};
 
 // `is.even(...)` determines whether a value is even
