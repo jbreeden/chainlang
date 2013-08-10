@@ -34,7 +34,7 @@
         <h1>
 <a name="chainlang" class="anchor" href="#chainlang"><span class="octicon octicon-link"></span></a>Chainlang</h1>
 
-<p>Chainlang is a utility for easily creating chainable methods and complex fluent APIs (or fluent interfaces) in JavaScript.</p>
+<p>Chainlang is a utility for easily creating chainable methods and complex fluent APIs in JavaScript.</p>
 
 <h1>
 <a name="motivation" class="anchor" href="#motivation"><span class="octicon octicon-link"></span></a>Motivation</h1>
@@ -48,7 +48,7 @@ to uncover the features of your fluent API without having to resort to the docum
 <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h1>
 
 <h2>
-<a name="creating-a-chainable-api" class="anchor" href="#creating-a-chainable-api"><span class="octicon octicon-link"></span></a>Creating A Chainable API</h2>
+<a name="creating-a-chainable-api" class="anchor" href="#creating-a-chainable-api"><span class="octicon octicon-link"></span></a>Creating a Chainable API</h2>
 
 <p>Just pass any JavaScript object to <code>chainlang.create</code> to create a chainable api:</p>
 
@@ -75,29 +75,61 @@ is returned by a method in the chain, the chain object itself is implicitly retu
 continue to chain other methods.</p>
 
 <h2>
+<a name="everything-is-chainable" class="anchor" href="#everything-is-chainable"><span class="octicon octicon-link"></span></a>Everything is Chainable</h2>
+
+<p>The object you pass to <code>chainlang.create</code> need not have all of it's method at the root level, as in
+the example above. Any method on the object graph, no matter how deeply nested, will be chainable.</p>
+
+<pre><code>var even = {
+    deeply: {
+        nested: {
+            methods: function(){
+                return;   
+            }
+        }
+    },
+    are: {
+        chainable: function(){
+            console.log(true);   
+        }
+    }
+};
+
+var even = chainlang.create(even);
+
+// Logs: true
+even().deeply.nested.methods().are.chainable();
+</code></pre>
+
+<h2>
 <a name="using-chainlangappend" class="anchor" href="#using-chainlangappend"><span class="octicon octicon-link"></span></a>Using <code>chainlang.append</code>
 </h2>
 
 <p><code>chainlang.append</code> is a simple function to help you build your language spec before passing it to
 <code>chainlang.create</code>. With <code>chainlang.append</code>, you can declare leaf nodes of an object graph and
-have the parent nodes filled in for you.</p>
+have the parent nodes filled in for you. So, the previous example could have been written like this:</p>
 
-<pre><code>var spec = {};
-chainlang.append(spec, 'some.nested.method', function(){});
+<pre><code>var even = {};
+chainlang.append(even, 'deeply.nested.methods', function(){ return; });
+chainlang.append(even, 'are.chainable', function(){ console.log(true); });
+even = chainlang.create(even);
 
-// Logs: { some: { nested: { method: [Function] } } }
-console.log(spec);
+// Logs: true
+even().deeply.nested.methods().are.chainable();
 </code></pre>
 
 <p>If you bind <code>chainlang.append</code> to some object, the first parameter may be omitted</p>
 
-<pre><code>var spec = {};
-var define = chainlang.append.bind(spec);
+<pre><code>var even = {};
+var define = chainlang.append.bind(even);
 
-define('another.nested.method', function(){});
+define('deeply.nested.methods', function(){ return; });
+define('are.chainable', function(){ console.log(true); });
 
-// Logs: { another: { nested: { method: [Function] } } }
-console.log(spec);
+even = chainlang.create(even);
+
+// Logs: true
+even().deeply.nested.methods().are.chainable();
 </code></pre>
 
 <h2>
@@ -167,6 +199,43 @@ delay().for(5).minutes.then(function(){
 <p>In the previous example, it would not make sense to have an expression such as <code>delay().minutes.then(...)</code>.
 The count needs to be declared before the units, so the units object is kept in private storage and exposed
 by <code>return</code>ing it from the <code>for(count)</code> call.</p>
+
+<h2>
+<a name="creating-modifiers" class="anchor" href="#creating-modifiers"><span class="octicon octicon-link"></span></a>Creating Modifiers</h2>
+
+<p>With fluent APIs, it can be useful to declare modifiers that alter the behavior of all methods that descend
+from them in the object graph. For this, chainlang exposes the <code>chainlang.proxy</code> method. This allows you to
+create a copy of an object with all of its methods proxied. This is the same technique used by
+chainlang to create an object with chainable methods in <code>chainlang.create</code>.</p>
+
+<pre><code>var is = {};
+
+// `is.even(...)` determines whether a value is even
+is.even = function(){
+    return (this._subject % 2 === 0);
+};
+
+// `isNot` has all the same methods of `is`, but negates their returns
+var isNot = chainlang.proxy(is, function(fn){
+    return function(){
+        return !fn.apply(this, arguments);  
+    };
+});
+
+is.not = isNot;
+
+is = chainlang.create(is);
+
+// Logs: true
+console.log(
+    is(68).even()
+);
+
+// Logs: false
+console.log(
+    is(68).not.even()
+);
+</code></pre>
 
 <h1>
 <a name="more-information" class="anchor" href="#more-information"><span class="octicon octicon-link"></span></a>More Information</h1>
