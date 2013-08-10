@@ -60,6 +60,7 @@ describe('A chain function returned from chainlang.create', function(){
 
         var chainConstructor = chainlang.create(stubLang);
 
+        debugger;
         expect(allFieldsOfFirstAppearInSecond(stubLang, chainConstructor())).to.be(true);
     });
 });

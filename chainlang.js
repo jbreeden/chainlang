@@ -24,6 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  */
 
+var createProxy = require('./proxy');
+
 (function(){
     "use strict";
     
@@ -74,6 +76,8 @@
         }
     };
     
+    chainlang.proxy = createProxy;
+    
     // chainlang.create
     // ----------------
 
@@ -115,54 +119,19 @@
     // Privates
     // --------
 
-    // This function kicks off the recursive traversal of the language
-    // spec object to create an object with chainable methods. (These are
-    // essentially "proxied" versions of the methods found on the language object.)
     function createChainableProxy(language){
         var chain = {};
+        
+        var methodWrapper = function(fn){
+            return function(){
+                var result = fn.apply(chain, arguments);
 
-        createChainableProxyNode(
-            chain,
-            chain, 
-            language);
-
-        return chain;
-    }
-
-    // This is the self-recursive method for construction of the chainable object
-    function createChainableProxyNode(node, chain, language){
-        Object.keys(language).forEach(function(key){
-
-            var prop = language[key];
-            if(prop === undefined || prop === null){
-               return;
-            }
-            
-            if(typeof prop == "function"){
-                node[key] = createChainableProxiedMethod(chain, prop);
-                createChainableProxyNode(node[key], chain, prop);
-            }
-            else if(typeof prop == "object"){
-                node[key] = {};
-                createChainableProxyNode(node[key], chain, prop);
-            }
-            else{
-                node[key] = prop;
-            }    
-        });
-    }
-
-    function createChainableProxiedMethod(chain, fn){
-        var i,
-            proxiedMethod;
-
-        proxiedMethod = function(){
-            var result = fn.apply(chain, arguments);
-            
-            // Any explicit return will prevent the implicit return of the chain
-            return (undefined === result) ? chain : result;
+                // Any explicit return will prevent the implicit return of the chain
+                return (undefined === result) ? chain : result;  
+            };
         };
-
-        return proxiedMethod;
+        
+        return createProxy(language, chain, methodWrapper);
     }
+
 }());
