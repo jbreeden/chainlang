@@ -139,6 +139,41 @@ In the previous example, it would not make sense to have an expression such as `
 The count needs to be declared before the units, so the units object is kept in private storage and exposed
 by `return`ing it from the `for(count)` call.
 
+Creating Modifiers
+------------------
+
+With fluent APIs, it can be useful to declare modifiers that alter the behavior of all methods that descend
+from them in the object graph. For this, chainlang exposes the `chainlang.proxy` method. This allows you to
+create a copy of an object with all of it's methods proxied. This is actually the same technique used by
+chainlang to create an object with chainable methods in `chainlang.create`.
+
+```
+var chainlang = require('./chainlang')
+
+var to = {};
+var define = chainlang.append.bind(to);
+
+define('be', function(val){
+    console.log(val);
+});
+
+var notTo = chainlang.proxy(to, function(fn){
+    return function(){
+        fn.call(this, !arguments[0]);  
+    };
+});
+       
+define('or.not.to', notTo);
+
+to = chainlang.create(to);
+
+// Logs:
+// true
+// flase
+to().be(true)
+    .or.not.to.be(true);
+```
+
 More Information
 ================
 
