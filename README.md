@@ -144,7 +144,7 @@ Creating Modifiers
 
 With fluent APIs, it can be useful to declare modifiers that alter the behavior of all methods that descend
 from them in the object graph. For this, chainlang exposes the `chainlang.proxy` method. This allows you to
-create a copy of an object with all of it's methods proxied. This is actually the same technique used by
+create a copy of an object with all of its methods proxied. This is the same technique used by
 chainlang to create an object with chainable methods in `chainlang.create`.
 
 ```
