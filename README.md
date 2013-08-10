@@ -46,7 +46,7 @@ Everything is Chainable
 -----------------------
 
 The object you pass to `chainlang.create` need not have all of it's method at the root level, as in
-the example above. Any method on the object graph, not matter how deeply nested, will be chainable.
+the example above. Any method on the object graph, no matter how deeply nested, will be chainable.
 
 ```
 var even = {
