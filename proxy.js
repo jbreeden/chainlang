@@ -1,6 +1,8 @@
-module.exports = createProxy;
+var proxy = {};
 
-function createProxy(obj, proxy, methodWrapper){
+module.exports = proxy;
+
+proxy.createProxy = function createProxy(obj, proxy, methodWrapper){
     // Normalize parameters
     if (arguments.length === 2 && typeof proxy === 'function') {
         // Proxy was omitted, create default object
@@ -42,29 +44,4 @@ function createProxyNode(obj, node, methodWrapper){
 
 function defaultMethodWrapper (fn) {
     return fn;
-}
-
-// If this module is run directly, we'll just execute a quick test
-
-if(require.main === module){
-    test();
-}
-
-function test(){
-    var methodWrapper = function(fn, name){
-        return function(){
-            console.log(name + ' called with: \n' + 
-                Array.prototype.slice.call(arguments).join('\n'));
-            fn.apply(this, arguments);
-        }
-    };
-    
-    var target = {
-        log: function(){ console.log('Target Method'); }
-    };
-    
-    var proxy = createProxy(target, methodWrapper);
-    
-    target.log();
-    proxy.log('some', 'args');
 }

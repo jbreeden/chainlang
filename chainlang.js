@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  */
 
-var createProxy = require('./proxy');
+var createProxy = require('./proxy').createProxy;
 
 (function(){
     "use strict";
@@ -97,11 +97,11 @@ var createProxy = require('./proxy');
 
         // ### chain expression constructor
         // ---
-        // The `chain` function is the constructor for chained expressions
+        // The `startChain` function starts chained expressions
         // of the new `chainlang` type. 
         // <a id="chain"></a>
-        function chain(obj){
-            if(arguments.length > 1){
+        var startChain = function (obj) {
+            if (arguments.length > 1) {
                 throw "Chain constructors can only accept one argument";
             }
 
@@ -111,9 +111,19 @@ var createProxy = require('./proxy');
             
             return theChain;
         }
+        
+        // Proxy `theChain` onto the `startChain` function such that
+        // any method calls implicitly invoke the `startChain` method themselves.
+        // This removed the requirement of using a function call to start the chain
+        // if no `_subject` needs to be captured
+        createProxy(theChain, startChain, function(method){
+            return function () {
+                return method.apply(startChain());  
+            };
+        });
 
         // Returning the `chain` constructor to the client of `chainlang.create`
-        return chain;
+        return startChain;
     };
 
     // Privates

@@ -60,8 +60,21 @@ describe('A chain function returned from chainlang.create', function(){
 
         var chainConstructor = chainlang.create(stubLang);
 
-        debugger;
         expect(allFieldsOfFirstAppearInSecond(stubLang, chainConstructor())).to.be(true);
+    });
+    
+    it('is called implicitly by the first method invocation if not directly invoked', function(){
+        var iGetCalledImplicitly = {
+            ifYouCallMe: function(){
+                return true;
+            }
+        };
+        
+        iGetCalledImplicitly = chainlang.create(iGetCalledImplicitly);
+        
+        expect(
+            iGetCalledImplicitly.ifYouCallMe()
+        ).to.be(true);
     });
 });
 
