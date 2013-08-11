@@ -118,7 +118,7 @@ var createProxy = require('./proxy').createProxy;
         // if no `_subject` needs to be captured
         createProxy(theChain, startChain, function(method){
             return function () {
-                return method.apply(startChain());  
+                return method.apply(startChain(), arguments);  
             };
         });
 

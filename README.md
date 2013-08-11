@@ -70,6 +70,18 @@ var even = chainlang.create(even);
 even().deeply.nested.methods().are.chainable();
 ```
 
+Skip The Initial Call
+---------------------
+
+As mentioned, `chainlang.create` returns a function that will start your chain. This function returns the
+chain object that all of your subsequent method calls are applied to. While this is required to allow chaining,
+the function call is only useful to clients if you want to capture some `_subject`. If you have no such need
+the function call is extraneous. `chainlang` will allow you to skip this initial call, and still makes.
+
+```
+// TODO: Need example
+```
+
 Using `chainlang.append`
 ------------------------
 

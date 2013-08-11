@@ -92,13 +92,13 @@ describe('A chain object', function(){
         });
         
         expect(
-            chain().returnsNothing()
+            chain.returnsNothing()
         ).to.eql(
             chain()
         );
         
         expect(
-            chain().levelTwo.returnsNothing()
+            chain.levelTwo.returnsNothing()
         ).to.eql(
             chain()
         );
@@ -191,7 +191,7 @@ describe('A chain object', function(){
         var theChain = chain();
         
         // Running some methods to spy on their `this` value
-        chain().topLevelFn().secondLevel.secondLevelFn();
+        chain.topLevelFn().secondLevel.secondLevelFn();
 
         expect(spy.thisValues[0]).to.be.eql(theChain);
         expect(spy.thisValues[1]).to.be.eql(theChain);
@@ -219,7 +219,7 @@ describe('The _data property of a chain', function(){
         });
 
         expect(
-            chain().setsData().doesNothing().readsAndReturnsData()
+            chain.setsData().doesNothing().readsAndReturnsData()
         ).to.be(1);
     });
 });
@@ -236,7 +236,7 @@ describe('Any node in the chain object graph', function(){
         
         var chain = chainlang.create(chainSpec);
 
-        chain().prop();
+        chain.prop();
 
         expect(spy.called).to.be(true);
         expect(chain().prop.methodsStillAvailable()).to.be(true);

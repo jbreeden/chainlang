@@ -1,6 +1,6 @@
 {
   "name": "chainlang",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Utility for easily creating chainable methods and complex fluent APIs in JavaScript",
   "main": "chainlang.js",
   "repository": "https://github.com/jbreeden/chainlang",
