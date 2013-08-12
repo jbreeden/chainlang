@@ -74,13 +74,24 @@ Skip The Initial Call
 ---------------------
 
 As mentioned, `chainlang.create` returns a function that will start your chain. This function returns the
-chain object that all of your subsequent method calls are applied to. While this is required to allow chaining,
-the function call is only useful to clients if you want to capture some `_subject`. If you have no such need
-the function call is extraneous. `chainlang` will allow you to skip this initial call, and still makes.
+chain object that all of your subsequent method calls are applied to. However, while this is required to allow 
+chaining, the function call is only useful to clients if you want to capture some `_subject`. So, `chainlang` will allow
+you to omit the first function call, and in that case makes it implicitly before the execution of any methods
+you do call, and the called method is applied to chain as usual.
+
+All that means that instead of
 
 ```
-// TODO: Need example
+even().deeply.nested.methods().are.chainable();
 ```
+
+You may write
+
+```
+even.deeply.nested.methods().are.chainable();
+```
+
+Saving yourself one massive set of parens.
 
 Using `chainlang.append`
 ------------------------
