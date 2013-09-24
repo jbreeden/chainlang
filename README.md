@@ -107,7 +107,7 @@ chainlang.append(even, 'are.chainable', function(){ console.log(true); });
 even = chainlang.create(even);
 
 // Logs: true
-even().deeply.nested.methods().are.chainable();
+even.deeply.nested.methods().are.chainable();
 ```
 
 If you bind `chainlang.append` to some object, the first parameter may be omitted
@@ -122,7 +122,7 @@ define('are.chainable', function(){ console.log(true); });
 even = chainlang.create(even);
 
 // Logs: true
-even().deeply.nested.methods().are.chainable();
+even.deeply.nested.methods().are.chainable();
 ```
 
 Sharing Data Between Links
@@ -146,7 +146,7 @@ define('logData', function(){
 var chain = chainlang.create(spec);
 
 // Logs: 999
-chain().setData(999).logData();
+chain.setData(999).logData();
 ```
 
 Keeping Your Privates Hidden
@@ -181,12 +181,12 @@ define('_private.units.minutes.then', function(callback){
 var delay = chainlang.create(delaySpec);
 
 // After 5 seconds, logs: '5 seconds elapsed'
-delay().for(5).seconds.then(function(){
+delay.for(5).seconds.then(function(){
     console.log('5 seconds elapsed');
 });
 
 // After 5 minutes, logs: '5 minutes elapsed'
-delay().for(5).minutes.then(function(){
+delay.for(5).minutes.then(function(){
     console.log('5 minutes elapsed');
 });
 ```
